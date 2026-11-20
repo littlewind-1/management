@@ -1,0 +1,2705 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>VL르웨스트종합관리시스템</title>
+<style>
+  :root {
+    --bg: #f4f6fa;
+    --card: #ffffff;
+    --fg: #0f172a;
+    --mut: #64748b;
+    --ln: #cbd5e1;
+    --ln-dark: #94a3b8;
+    --hd: #e8eef7;
+    --hd2: #f1f5f9;
+    --bl: #1f5fbf;
+    --bl-hover: #174996;
+    --ok: #15803d;
+    --ok-hover: #116630;
+    --bad: #dc2626;
+    --sel: rgba(31, 95, 191, 0.16);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Pretendard', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    font-size: 13.5px;
+    line-height: 1.4;
+  }
+  .container {
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  /* 상단 헤더 */
+  .top-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--card);
+    border: 1.5px solid var(--ln-dark);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+  }
+  .top-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .ctrl-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--hd2);
+    border: 1px solid var(--ln);
+    border-radius: 8px;
+    padding: 5px 9px;
+  }
+  .ctrl-group label {
+    font-weight: 700;
+    color: #334155;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+  input, select, textarea, button {
+    font: inherit;
+  }
+  input[type="date"], input[type="text"], select {
+    border: 1px solid var(--ln);
+    border-radius: 6px;
+    padding: 5px 8px;
+    background: #fff;
+    color: var(--fg);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--bl);
+    box-shadow: 0 0 0 2px rgba(31, 95, 191, 0.18);
+  }
+  button {
+    border: 1px solid var(--ln-dark);
+    border-radius: 7px;
+    padding: 6px 12px;
+    background: #fff;
+    color: var(--fg);
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.08s ease, background-color 0.15s, filter 0.15s;
+    user-select: none;
+  }
+  button:hover { filter: brightness(0.96); }
+  button:active { transform: scale(0.96) translateY(1px); }
+  button.pri {
+    background: var(--bl);
+    color: #fff;
+    border-color: var(--bl);
+  }
+  button.pri:hover { background: var(--bl-hover); filter: none; }
+  button.ok {
+    background: var(--ok);
+    color: #fff;
+    border-color: var(--ok);
+  }
+  button.ok:hover { background: var(--ok-hover); filter: none; }
+  button.danger {
+    background: #fef2f2;
+    color: var(--bad);
+    border-color: #fecaca;
+  }
+  button.sm {
+    padding: 4px 9px;
+    font-size: 12.5px;
+  }
+  .day-pill {
+    font-weight: 800;
+    color: var(--bl);
+    background: #dbeafe;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+  }
+
+  /* 카드 블록 */
+  .card {
+    background: var(--card);
+    border: 1.5px solid var(--ln-dark);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+  }
+
+  /* 관리부서 / 관리자 테이블 */
+  table.grid-form {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  table.grid-form th, table.grid-form td {
+    border: 1px solid var(--ln-dark);
+    padding: 6px 8px;
+    vertical-align: middle;
+  }
+  table.grid-form th {
+    background: var(--hd);
+    font-weight: 800;
+    text-align: center;
+    color: #1e293b;
+  }
+  .inline-flex-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .inline-flex-cell input, .inline-flex-cell select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* 내용입력 섹션: 아래 리스트 표 넓이와 동일하게 맞춤 + 내용입력 셀 내부 텍스트 밑에 등록버튼 배치 */
+  #entry-card {
+    width: 100%;
+  }
+  table.entry-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  table.entry-table th, table.entry-table td {
+    border: 1px solid var(--ln-dark);
+    padding: 6px 8px;
+    vertical-align: middle;
+  }
+  table.entry-table th.side-title {
+    background: var(--hd);
+    font-size: 17px;
+    font-weight: 900;
+    text-align: center;
+    color: #0f172a;
+    width: 150px;
+    padding: 12px 10px;
+  }
+  .side-title-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+  .btn-register-in-cell {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 15px;
+    font-weight: 900;
+    border-radius: 8px;
+    background: var(--bl);
+    color: #fff;
+    border: none;
+    box-shadow: 0 2px 6px rgba(31, 95, 191, 0.28);
+  }
+  .btn-register-in-cell:hover { background: var(--bl-hover); filter: none; }
+  table.entry-table th.sub-lbl {
+    background: var(--hd2);
+    font-weight: 800;
+    text-align: center;
+    width: 145px;
+    color: #1e293b;
+  }
+  .entry-table textarea {
+    width: 100%;
+    border: 1px solid var(--ln);
+    border-radius: 6px;
+    padding: 6px 8px;
+    resize: vertical;
+    min-height: 42px;
+    background: #fff;
+    color: var(--fg);
+  }
+
+  /* 하단 리스트 툴바 */
+  .list-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--hd2);
+    border: 1px solid var(--ln-dark);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+  }
+  .toolbar-left, .toolbar-right {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+  .search-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #fff;
+    border: 1px solid var(--ln-dark);
+    border-radius: 7px;
+    padding: 3px 6px;
+  }
+  .search-box input {
+    border: none;
+    box-shadow: none !important;
+    padding: 3px 5px;
+    width: 220px;
+  }
+  .style-tool {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fff;
+    border: 1px solid var(--ln);
+    border-radius: 7px;
+    padding: 3px 7px;
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  .style-tool input[type="color"] {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+  }
+  .filter-banner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    background: #fef9c3;
+    border: 1px solid #facc15;
+    border-bottom: none;
+    padding: 6px 12px;
+    font-weight: 700;
+    color: #854d0e;
+    font-size: 13px;
+  }
+  .filter-banner.active {
+    display: flex;
+  }
+
+  /* 메인 스프레드시트 리스트 테이블 */
+  .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--ln-dark);
+    border-radius: 0 0 8px 8px;
+    background: #fff;
+  }
+  table.sheet-table {
+    width: 100%;
+    min-width: 1020px;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  table.sheet-table th, table.sheet-table td {
+    border-right: 1px solid var(--ln-dark);
+    border-bottom: 1px solid var(--ln-dark);
+    padding: 0;
+    text-align: center;
+    height: 32px;
+    position: relative;
+  }
+  table.sheet-table th:last-child, table.sheet-table td:last-child {
+    border-right: none;
+  }
+  table.sheet-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  table.sheet-table th {
+    background: var(--hd);
+    font-weight: 800;
+    font-size: 13px;
+    padding: 6px 4px;
+    color: #0f172a;
+    user-select: none;
+  }
+  table.sheet-table td.seq-cell {
+    background: #f8fafc;
+    font-weight: 700;
+    color: var(--mut);
+    font-size: 12.5px;
+    user-select: none;
+  }
+  table.sheet-table td.selected {
+    background-color: var(--sel) !important;
+    box-shadow: inset 0 0 0 2px var(--bl);
+  }
+  .cell-editor {
+    width: 100%;
+    height: 100%;
+    min-height: 31px;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    padding: 5px 6px;
+    outline: none;
+    resize: none;
+    overflow: hidden;
+    display: block;
+    line-height: 1.35;
+  }
+  .cell-editor.tc { text-align: center; }
+  .cell-editor.tl { text-align: left; }
+  .cell-editor:focus {
+    background: rgba(59, 130, 246, 0.08);
+    box-shadow: inset 0 0 0 2px var(--bl);
+  }
+  .btn-row-del {
+    padding: 3px 8px;
+    font-size: 12px;
+    border-radius: 5px;
+    background: #fff;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+  }
+  .btn-row-del:hover {
+    background: #fee2e2;
+  }
+
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 12.5px;
+    color: var(--mut);
+  }
+  #status-msg {
+    font-weight: 700;
+    color: var(--bl);
+  }
+  #status-msg.err {
+    color: var(--bad);
+  }
+
+  /* A4 인쇄 스타일 */
+  @media print {
+    @page {
+      size: A4 portrait;
+      margin: 10mm;
+    }
+    html, body {
+      background: #fff !important;
+      color: #000 !important;
+      font-size: 11pt;
+    }
+    .container {
+      max-width: none !important;
+      width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    .no-print,
+    .top-controls,
+    #dept-mgr-card,
+    #entry-card,
+    .list-toolbar,
+    .status-bar,
+    th.col-del,
+    td.col-del {
+      display: none !important;
+    }
+    .top-header {
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 0 8px 0 !important;
+      margin-bottom: 8px !important;
+      border-bottom: 2px solid #000 !important;
+      border-radius: 0 !important;
+    }
+    .print-meta {
+      display: block !important;
+      font-size: 10pt;
+      font-weight: 700;
+    }
+    .card {
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    .table-wrap {
+      border: 1px solid #000 !important;
+      border-radius: 0 !important;
+      overflow: visible !important;
+    }
+    table.sheet-table {
+      min-width: 0 !important;
+      width: 100% !important;
+    }
+    table.sheet-table th, table.sheet-table td {
+      border: 1px solid #333 !important;
+      height: auto !important;
+      font-size: 9.5pt !important;
+      padding: 3px 4px !important;
+    }
+    table.sheet-table th {
+      background: #e2e8f0 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    table.sheet-table td.selected {
+      background-color: transparent !important;
+      box-shadow: none !important;
+    }
+    .cell-editor {
+      min-height: 0 !important;
+      padding: 0 !important;
+      white-space: pre-wrap !important;
+      overflow: visible !important;
+    }
+    tr {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+  }
+  .print-meta { display: none; }
+
+  /* ===== 표지 / 실시간 저장 / 화면 전환 ===== */
+  :root { color-scheme: light; box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  /* 표지 바탕색 연하게 변경 */
+  html.cover, html.cover body { background: #5b9bd5; }
+  .view { display: none; }
+  .view.on { display: block; }
+  .cv-wrap { max-width: 1100px; margin: 0 auto; min-height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); padding: 22px 26px 22px; display: flex; flex-direction: column; color: #fff; }
+  .cv-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 18px; font-weight: 800; }
+  /* 표지 제목 더 크고 두껍게 + 등록란과 간격 확대 */
+  .cv-title { text-align: center; font-size: clamp(36px, 5.8vw, 60px); font-weight: 900; letter-spacing: -0.03em; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.14); margin: clamp(18px, 4.5vh, 46px) 0 clamp(40px, 9.5vh, 92px); }
+  /* 표지 등록란 넓이 축소 및 중앙 배치 */
+  .cv-card { background: #fff; color: #0f172a; border-radius: 12px; padding: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.15); max-width: 820px; width: 100%; margin: 0 auto; }
+  .cv-go { display: flex; align-items: center; gap: 14px; margin: 28px auto 0; max-width: 820px; width: 100%; flex-wrap: wrap; }
+  .go-btn { background: #fff; color: #2b6cb0; border: 0; border-radius: 10px; padding: 14px 30px; font-size: 18px; font-weight: 900; box-shadow: 0 4px 12px rgba(0,0,0,.16); }
+  .cv-hint { font-weight: 700; opacity: .95; }
+  .cv-msg { margin: 14px auto 0; max-width: 820px; width: 100%; font-weight: 800; min-height: 0; }
+  .cv-msg:empty { display: none; }
+  .cv-msg.bad { background: #fee2e2; color: #991b1b; padding: 7px 12px; border-radius: 8px; display: inline-block; align-self: flex-start; }
+  .cv-msg:not(.bad):not(:empty) { background: rgba(255,255,255,.22); padding: 7px 12px; border-radius: 8px; display: inline-block; align-self: flex-start; }
+  .cv-bottom { margin-top: auto; padding-top: 16px; display: flex; justify-content: flex-end; align-items: flex-end; }
+  .cv-ver { font-weight: 800; font-size: 16px; }
+  .sync-pill { display: inline-block; padding: 3px 11px; border-radius: 999px; font-size: 12px; font-weight: 800; white-space: nowrap; }
+  .s-live { background: #dcfce7; color: #166534; }
+  .s-save { background: #dbeafe; color: #1e40af; }
+  .s-warn { background: #fef3c7; color: #92400e; }
+  .s-connecting { background: #e2e8f0; color: #334155; }
+
+  /* 부서별 페이지 제목 박스 및 하단 흰색 담당부서·관리자 박스 (제목 넓이와 동일) */
+  .hdr-cell { display: inline-flex; flex-direction: column; gap: 8px; border-radius: 10px; padding: 10px 16px; color: #fff; background: var(--dc, #0f2952); transition: background-color .25s; box-shadow: 0 2px 8px rgba(0,0,0,0.14); }
+  .hdr-title { display: flex; align-items: center; gap: 10px; font-size: clamp(22px, 2.7vw, 30px); font-weight: 900; letter-spacing: -0.03em; white-space: nowrap; }
+  .hdr-title .badge-logo { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 9px; background: rgba(255,255,255,.22); font-size: 16px; font-weight: 800; flex-shrink: 0; }
+  .hdr-sub-box { width: 100%; background: #ffffff; color: #0f172a; border-radius: 8px; padding: 7px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+  .hdr-sub { font-size: 21px; font-weight: 900; letter-spacing: -0.02em; color: #0f172a; line-height: 1.25; }
+  .flash td { animation: flashbg 1.6s ease-out; }
+
+  /* ===== 화면 고정 + 헤더 한 줄 배치 ===== */
+  html, body { height: 100%; overflow: hidden; }
+  .view.on { height: 100%; }
+  .cv-wrap { min-height: 0; height: 100%; overflow-y: auto; }
+  #view-consult.on { display: flex; flex-direction: column; }
+  #view-consult .container { width: 100%; height: 100%; display: flex; flex-direction: column; overflow-y: auto; padding: 12px 16px; }
+  #view-consult .container > header, #view-consult .container > #entry-card { flex: none; }
+  #view-consult .container > section.card:last-child { flex: 1; min-height: 0; display: flex; flex-direction: column; margin-bottom: 0; }
+  #view-consult .table-wrap { flex: 1; min-height: 140px; overflow: auto; }
+  #view-consult .sheet-table thead th { position: sticky; top: 0; z-index: 2; background: var(--hd); }
+  .top-header { flex-wrap: wrap; align-items: center; background: var(--hc, #1f5fbf); border-color: var(--hc, #1f5fbf); transition: background-color .25s; }
+  .top-header .hdr-cell { background: var(--dc, #0f2952); border: 1.5px solid rgba(255,255,255,.45); flex: none; }
+  .hdr-row { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .hdr-row .hdr-sub { margin-top: 0; }
+  .top-controls { flex: 1; justify-content: flex-end; min-width: 0; }
+  .top-controls .ctrl-group { background: rgba(255,255,255,.94); }
+  .top-controls > button { background: #fff; }
+  .top-controls > button.ok { background: var(--ok); color: #fff; }
+  .back-btn { background: #fff; color: #0f172a; border-color: #fff; }
+  @media print {
+    html, body { height: auto !important; overflow: visible !important; }
+    .view.on, #view-consult.on { height: auto !important; display: block !important; }
+    #view-consult .container { height: auto !important; display: block !important; overflow: visible !important; }
+    #view-consult .container > section.card:last-child { display: block !important; }
+    #view-consult .table-wrap { overflow: visible !important; }
+    .top-header { background: #fff !important; }
+  }
+  @keyframes flashbg { from { box-shadow: inset 0 0 0 100px rgba(250, 204, 21, .5); } to { box-shadow: inset 0 0 0 100px rgba(250, 204, 21, 0); } }
+  @media (max-width: 760px) {
+    #cv-form, #cv-form tbody, #cv-form tr, #cv-form th, #cv-form td { display: block; width: 100%; }
+    #cv-form colgroup { display: none; }
+    .cv-title { margin: 28px 0 36px; }
+  }
+  @media print {
+    #view-cover { display: none !important; }
+    .hdr-cell { background: #fff !important; color: #000 !important; padding: 0 !important; box-shadow: none !important; }
+    .hdr-title .badge-logo { display: none !important; }
+    .hdr-sub-box { border: 1px solid #333 !important; box-shadow: none !important; }
+    .hdr-sub { color: #000 !important; }
+  }
+
+  /* 표지 이동 버튼 그룹 */
+  .cv-go-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 26px auto 0;
+    max-width: 820px;
+    width: 100%;
+  }
+  .cv-go-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .go-btn.daily-btn {
+    color: #0f766e;
+  }
+  .go-btn.weekly-btn {
+    color: #5b21b6;
+  }
+
+  /* 일일 / 주간 업무일지 뷰 (전체 페이지 바탕색 구분) */
+  html.report-daily, html.report-daily body,
+  html.report-daily #view-daily, html.report-daily #view-daily.on {
+    background: #d8efe8 !important;
+    overflow: auto !important;
+    height: auto !important;
+  }
+  html.report-weekly, html.report-weekly body,
+  html.report-weekly #view-weekly, html.report-weekly #view-weekly.on {
+    background: #e6ddf8 !important;
+    overflow: auto !important;
+    height: auto !important;
+  }
+  #view-daily.on, #view-weekly.on {
+    display: block;
+    min-height: 100vh;
+    padding: 14px;
+  }
+  #view-daily .rep-shell {
+    background: #c8e6dc;
+    border-color: #6ea895;
+  }
+  #view-weekly .rep-shell {
+    background: #d8cbf4;
+    border-color: #9e87d4;
+  }
+  .rep-shell {
+    max-width: 1280px;
+    margin: 0 auto;
+    border: 1.5px solid var(--ln-dark);
+    border-radius: 14px;
+    padding: 14px 18px 22px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+  }
+  .rep-topbar {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid var(--ln-dark);
+    border-radius: 10px;
+    padding: 7px 10px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+  }
+  .rep-topbar-left, .rep-topbar-right {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+  .rep-topbar label {
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .rep-topbar input[type="date"],
+  .rep-topbar select {
+    padding: 3px 6px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+  .rep-topbar button.sm {
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+  .rep-paper {
+    background: #ffffff;
+    border: 1.5px solid #334155;
+    border-radius: 10px;
+    padding: 18px 20px;
+    color: #0f172a;
+  }
+  .rep-meta-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 14px;
+    flex-wrap: nowrap;
+    margin-bottom: 12px;
+  }
+  .rep-title-area {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 8px;
+    padding: 0 6px;
+  }
+  .rep-doc-title {
+    margin: 0;
+    text-align: center;
+    font-size: clamp(26px, 3vw, 35px);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    color: #0f172a;
+    line-height: 1.18;
+    white-space: nowrap;
+    text-shadow: 0.45px 0 0 currentColor, -0.45px 0 0 currentColor;
+  }
+  .rep-date-sub {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: #334155;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    white-space: nowrap;
+  }
+  .rep-weekly-subrow {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #1e293b;
+    padding: 0 4px;
+  }
+  .rep-weekly-subrow span {
+    white-space: nowrap;
+  }
+
+  /* 인원 현황표: 넓이 축소 + 입력란 도형/테두리/배경 제거 */
+  table.headcount-tbl {
+    border-collapse: collapse;
+    table-layout: fixed;
+    width: auto;
+    flex-shrink: 0;
+    background: #fff;
+  }
+  table.headcount-tbl th, table.headcount-tbl td {
+    border: 1px solid #475569;
+    text-align: center;
+    padding: 0;
+    width: 44px;
+    min-width: 44px;
+    max-width: 44px;
+    height: 26px;
+    font-size: 12px;
+    background: #fff;
+  }
+  table.headcount-tbl th.hc-group {
+    background: #9ca3af;
+    color: #0f172a;
+    font-weight: 900;
+    height: 24px;
+  }
+  table.headcount-tbl th.hc-sub {
+    background: #d1d5db;
+    color: #0f172a;
+    font-weight: 800;
+    height: 24px;
+  }
+  table.headcount-tbl td.hc-sum {
+    background: #f1f5f9;
+    font-weight: 900;
+    color: #0f172a;
+  }
+  .hc-inp {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 100%;
+    min-height: 24px;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    text-align: center;
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #0f172a;
+    padding: 0;
+    margin: 0;
+    outline: none;
+  }
+  .hc-inp:focus {
+    background: rgba(59, 130, 246, 0.12) !important;
+    box-shadow: inset 0 0 0 1.5px #2563eb !important;
+  }
+
+  table.work-log-tbl {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    background: #fff;
+  }
+  table.work-log-tbl th, table.work-log-tbl td {
+    border: 1px solid #475569;
+    padding: 0;
+    vertical-align: top;
+  }
+  table.work-log-tbl thead th {
+    background: #7c828a;
+    color: #ffffff;
+    font-weight: 900;
+    font-size: 14px;
+    padding: 7px 6px;
+    text-align: center;
+  }
+  table.work-log-tbl td.wl-cat-major {
+    background: #ffffff;
+    font-weight: 900;
+    font-size: 14px;
+    text-align: center;
+    vertical-align: middle;
+    padding: 6px;
+  }
+  table.work-log-tbl td.wl-cat-sub {
+    background: #ffffff;
+    font-weight: 800;
+    font-size: 13.5px;
+    text-align: center;
+    vertical-align: middle;
+    padding: 6px;
+  }
+  table.work-log-tbl td.wl-cat-single {
+    background: #ffffff;
+    font-weight: 900;
+    font-size: 14px;
+    text-align: center;
+    vertical-align: middle;
+    padding: 6px;
+  }
+  .wl-cell-ta {
+    width: 100%;
+    min-height: 76px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: #0f172a;
+    font-size: 13px;
+    line-height: 1.45;
+    padding: 6px 8px;
+    resize: none;
+    overflow: hidden;
+    display: block;
+    outline: none;
+    word-break: break-word;
+  }
+  .wl-cell-ta.sm-h {
+    min-height: 58px;
+  }
+  .wl-cell-ta:focus {
+    background: rgba(59, 130, 246, 0.08);
+    box-shadow: inset 0 0 0 2px #2563eb;
+  }
+
+  @media print {
+    html.report-daily, html.report-daily body,
+    html.report-weekly, html.report-weekly body {
+      background: #fff !important;
+      overflow: visible !important;
+      height: auto !important;
+    }
+    html.report-daily.print-one-page,
+    html.report-weekly.print-one-page {
+      zoom: 0.78;
+    }
+    #view-daily.on, #view-weekly.on {
+      padding: 0 !important;
+      min-height: 0 !important;
+    }
+    .rep-shell {
+      max-width: none !important;
+      width: 100% !important;
+      background: #fff !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+    }
+    .rep-topbar {
+      display: none !important;
+    }
+    .rep-paper {
+      border: 1px solid #000 !important;
+      border-radius: 0 !important;
+      padding: 4mm 6mm !important;
+      box-shadow: none !important;
+    }
+    .rep-meta-head {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: stretch !important;
+      flex-wrap: nowrap !important;
+      gap: 10px !important;
+      margin-bottom: 6px !important;
+      width: 100% !important;
+    }
+    .rep-title-area {
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+      padding: 0 2px !important;
+      gap: 4px !important;
+    }
+    .rep-doc-title {
+      text-align: center !important;
+      font-size: 18pt !important;
+      letter-spacing: -0.05em !important;
+      white-space: nowrap !important;
+      color: #000 !important;
+    }
+    .rep-date-sub {
+      font-size: 10pt !important;
+      white-space: nowrap !important;
+      color: #000 !important;
+    }
+    .rep-weekly-subrow {
+      font-size: 9pt !important;
+      color: #000 !important;
+    }
+    table.headcount-tbl {
+      width: auto !important;
+      flex-shrink: 0 !important;
+      table-layout: fixed !important;
+    }
+    table.headcount-tbl th, table.headcount-tbl td {
+      width: 34px !important;
+      min-width: 34px !important;
+      max-width: 34px !important;
+      height: 19px !important;
+      font-size: 8.5pt !important;
+      padding: 0 !important;
+    }
+    table.headcount-tbl th.hc-group,
+    table.headcount-tbl th.hc-sub {
+      height: 18px !important;
+    }
+    .hc-inp {
+      -webkit-appearance: none !important;
+      appearance: none !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      min-height: 18px !important;
+      font-size: 9pt !important;
+      padding: 0 !important;
+    }
+    table.work-log-tbl thead th {
+      padding: 4px 5px !important;
+      font-size: 10pt !important;
+    }
+    table.work-log-tbl td.wl-cat-major,
+    table.work-log-tbl td.wl-cat-sub,
+    table.work-log-tbl td.wl-cat-single {
+      padding: 3px 4px !important;
+      font-size: 9.5pt !important;
+    }
+    .wl-cell-ta {
+      min-height: 54px !important;
+      padding: 3px 6px !important;
+      font-size: 9pt !important;
+      line-height: 1.3 !important;
+    }
+    .wl-cell-ta.sm-h {
+      min-height: 44px !important;
+    }
+    .hc-inp:focus, .wl-cell-ta:focus {
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+    table.work-log-tbl thead th,
+    table.headcount-tbl th.hc-group,
+    table.headcount-tbl th.hc-sub,
+    table.headcount-tbl td.hc-sum {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    tr {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+  }
+
+</style>
+</head>
+<body>
+<!-- ============ 표지 페이지 ============ -->
+<div id="view-cover" class="view">
+  <div class="cv-wrap">
+    <div class="cv-top">
+      <div class="cv-corp">삼구아이앤씨</div>
+      <div class="cv-date" id="cv-date">-</div>
+    </div>
+
+    <h1 class="cv-title">VL르웨스트 종합 관리 시스템</h1>
+
+    <div class="cv-card">
+      <table class="grid-form" id="cv-form">
+        <colgroup><col style="width:130px;"><col style="width:38%;"><col style="width:130px;"><col></colgroup>
+        <tbody>
+          <tr>
+            <th>관리부서 등록</th>
+            <td>
+              <div class="inline-flex-cell">
+                <input type="text" id="dept-input" placeholder="관리부서명 입력 후 등록버튼 클릭" autocomplete="off">
+                <button id="btn-dept-add" class="pri sm">등록</button>
+              </div>
+            </td>
+            <th>관리부서 선택</th>
+            <td>
+              <div class="inline-flex-cell">
+                <select id="dept-select"></select>
+                <button id="btn-dept-del" class="danger sm" title="선택된 관리부서 삭제">삭제</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <th>관리자 등록</th>
+            <td>
+              <div class="inline-flex-cell">
+                <input type="text" id="mgr-rank-input" placeholder="직책" style="max-width:86px;" autocomplete="off">
+                <input type="text" id="mgr-name-input" placeholder="관리자 이름 입력 후 등록" autocomplete="off">
+                <button id="btn-mgr-add" class="pri sm">등록</button>
+              </div>
+            </td>
+            <th>관리자 선택</th>
+            <td>
+              <div class="inline-flex-cell">
+                <select id="mgr-select"></select>
+                <button id="btn-mgr-del" class="danger sm" title="선택된 관리자 삭제">삭제</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cv-go-stack">
+      <div class="cv-go-row">
+        <button id="btn-go" class="go-btn">상담 관리 페이지로 이동 ▶</button>
+        <span class="cv-hint">&lt; 클릭하면 다음 페이지로 이동</span>
+      </div>
+      <div class="cv-go-row">
+        <button id="btn-go-daily" class="go-btn daily-btn">일일 업무일지 이동 ▶</button>
+        <span class="cv-hint">&lt; 일일 업무일지 페이지로 이동</span>
+      </div>
+      <div class="cv-go-row">
+        <button id="btn-go-weekly" class="go-btn weekly-btn">주간 업무일지 이동 ▶</button>
+        <span class="cv-hint">&lt; 주간 업무일지 페이지로 이동</span>
+      </div>
+    </div>
+    <div id="cover-msg" class="cv-msg"></div>
+
+    <div class="cv-bottom">
+      <span class="cv-ver">ver1.0</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 상담 관리 페이지 ============ -->
+<div id="view-consult" class="view">
+<div class="container">
+  <header class="top-header">
+    <div class="hdr-cell" id="hdr-cell">
+      <div class="hdr-title"><span class="badge-logo">VL</span><span>VL르웨스트종합관리시스템</span></div>
+      <div class="hdr-sub-box">
+        <div class="hdr-row">
+          <div class="hdr-sub" id="hdr-sub">-</div>
+          <span id="pill" class="sync-pill s-connecting">연결 중…</span>
+        </div>
+      </div>
+    </div>
+    <div id="print-meta" class="print-meta"></div>
+    <div class="top-controls no-print">
+      <div class="ctrl-group">
+        <label for="work-date">요일선택</label>
+        <input type="date" id="work-date" data-nav="top">
+        <span id="day-label" class="day-pill">오늘</span>
+      </div>
+      <button id="btn-day-save" class="ok" data-nav="top">일자별 저장</button>
+      <div class="ctrl-group">
+        <label for="saved-date-select">저장목록</label>
+        <select id="saved-date-select" data-nav="top" style="min-width:150px;"></select>
+        <button id="btn-day-load" class="pri sm" data-nav="top">일자별 불러오기</button>
+        <button id="btn-day-del" class="danger sm" data-nav="top" title="선택한 저장일자 삭제">삭제</button>
+      </div>
+      <button id="btn-print" data-nav="top">🖨 인쇄</button>
+      <button id="btn-consult-daily" class="sm" data-nav="top" style="background:#e6f4f1;color:#0f766e;border-color:#86b8ac;">일일 업무일지</button>
+      <button id="btn-consult-weekly" class="sm" data-nav="top" style="background:#f1ebfc;color:#5b21b6;border-color:#b49fe0;">주간 업무일지</button>
+      <button id="btn-cover" class="back-btn" data-nav="top" title="표지로 돌아가 부서/관리자 변경">◀ 표지</button>
+    </div>
+  </header>
+
+  <section id="entry-card" class="card no-print">
+    <table class="entry-table">
+      <tbody>
+        <tr>
+          <th rowspan="5" class="side-title">
+            <div class="side-title-inner">
+              <span>내용입력</span>
+              <button id="btn-entry-register" class="btn-register-in-cell" data-nav="entry">등록</button>
+            </div>
+          </th>
+          <th class="sub-lbl">동선택</th>
+          <td>
+            <select id="entry-dong" style="width:140px;" data-nav="entry">
+              <option value="A">A동</option>
+              <option value="B">B동</option>
+              <option value="C">C동</option>
+              <option value="D">D동</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th class="sub-lbl">세대번호 입력</th>
+          <td><input type="text" id="entry-room" placeholder="예: 305, 1204 등 입력" style="width:100%;" data-nav="entry" autocomplete="off"></td>
+        </tr>
+        <tr>
+          <th class="sub-lbl">날짜/시간 자동입력</th>
+          <td><input type="text" id="entry-datetime" style="width:100%; background:#f8fafc; font-weight:700;" data-nav="entry"></td>
+        </tr>
+        <tr>
+          <th class="sub-lbl">상담 내용</th>
+          <td><textarea id="entry-consult" rows="2" placeholder="상담 내용을 입력하세요" data-nav="entry"></textarea></td>
+        </tr>
+        <tr>
+          <th class="sub-lbl">조치 내용</th>
+          <td><textarea id="entry-action" rows="2" placeholder="조치 내용을 입력하세요" data-nav="entry"></textarea></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <div class="list-toolbar no-print">
+      <div class="toolbar-left">
+        <div class="search-box">
+          <input type="text" id="search-input" placeholder="세대번호, 관리자명, 관리부서명으로 찾기" data-nav="tool" autocomplete="off">
+          <button id="btn-find" class="pri sm" data-nav="tool">찾기</button>
+        </div>
+        <button id="btn-reset-view" class="sm" data-nav="tool">원래대로</button>
+        <button id="btn-add-row" class="ok sm" data-nav="tool">+ 행 추가</button>
+      </div>
+      <div class="toolbar-right">
+        <div class="style-tool" title="선택한 셀 채우기">
+          <span>채우기</span>
+          <input type="color" id="fill-color" value="#fef08a">
+          <button id="btn-fill-apply" class="sm" style="padding:2px 6px;">적용</button>
+          <button id="btn-fill-clear" class="sm" style="padding:2px 6px;">없음</button>
+        </div>
+        <div class="style-tool" title="선택한 셀 글자색">
+          <span>글자색</span>
+          <input type="color" id="font-color" value="#dc2626">
+          <button id="btn-font-apply" class="sm" style="padding:2px 6px;">적용</button>
+        </div>
+        <div class="style-tool" title="선택한 셀 테두리">
+          <span>테두리</span>
+          <select id="border-style" style="padding:2px 4px; font-size:12px;">
+            <option value="2px solid #0f172a">굵게</option>
+            <option value="1px solid #0f172a">보통</option>
+            <option value="2px solid #1f5fbf">파랑 강조</option>
+            <option value="2px solid #dc2626">빨강 강조</option>
+            <option value="none">테두리 없음</option>
+          </select>
+          <button id="btn-border-apply" class="sm" style="padding:2px 6px;">적용</button>
+        </div>
+        <button id="btn-undo" class="sm" data-nav="tool">실행취소</button>
+      </div>
+    </div>
+
+    <div id="filter-banner" class="filter-banner no-print">
+      <span id="filter-banner-text">검색 결과 표시 중</span>
+      <button id="btn-banner-reset" class="sm">원래대로</button>
+    </div>
+
+    <div class="table-wrap">
+      <table class="sheet-table" id="list-table">
+        <colgroup>
+          <col style="width:52px;"><col style="width:64px;"><col style="width:96px;"><col style="width:110px;"><col style="width:100px;">
+          <col style="width:27%;"><col style="width:23%;"><col style="width:15%;"><col class="col-del" style="width:68px;">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>순번</th><th>동</th><th>세대번호</th><th>관리부서</th><th>관리자</th>
+            <th>상담 내용</th><th>조치 내용</th><th>기타</th><th class="col-del">삭제</th>
+          </tr>
+        </thead>
+        <tbody id="list-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="status-bar no-print">
+      <span id="status-msg">준비 완료 · 입력 내용은 실시간으로 자동 저장됩니다</span>
+      <span id="row-count-info">총 0행</span>
+    </div>
+  </section>
+</div>
+</div>
+
+<!-- ============ 일일 업무일지 페이지 ============ -->
+<div id="view-daily" class="view">
+  <div class="rep-shell">
+    <div class="rep-topbar no-print">
+      <div class="rep-topbar-left">
+        <label style="font-weight:800;">작성일</label>
+        <input type="date" id="daily-date-picker" data-rnav="daily">
+        <button id="btn-daily-create" class="pri sm" data-rnav="daily">일자별 생성</button>
+        <button id="btn-daily-save" class="ok sm" data-rnav="daily">일자별 저장</button>
+        <select id="daily-saved-select" data-rnav="daily" style="min-width:145px;"></select>
+        <button id="btn-daily-load" class="pri sm" data-rnav="daily">불러오기</button>
+        <button id="btn-daily-del" class="danger sm" data-rnav="daily">삭제</button>
+      </div>
+      <div class="rep-topbar-right">
+        <button id="btn-daily-print" class="sm" data-rnav="daily">🖨 인쇄</button>
+        <button id="btn-daily-home" class="sm" data-rnav="daily">◀ 표지</button>
+        <button id="btn-daily-consult" class="pri sm" data-rnav="daily">상담 관리</button>
+        <button id="btn-daily-weekly" class="sm" data-rnav="daily" style="background:#f1ebfc;color:#5b21b6;border-color:#b49fe0;">주간 업무일지</button>
+      </div>
+    </div>
+
+    <div class="rep-paper">
+      <div class="rep-meta-head">
+        <div class="rep-title-area">
+          <h2 class="rep-doc-title">일일 업무 보고 _ VL 르웨스트</h2>
+          <div class="rep-date-sub" id="daily-display-date"></div>
+        </div>
+        <table class="headcount-tbl" id="daily-hc-table">
+          <thead>
+            <tr><th colspan="9" class="hc-group">인원 현황</th></tr>
+            <tr>
+              <th class="hc-sub">관리</th>
+              <th class="hc-sub">기계</th>
+              <th class="hc-sub">전기</th>
+              <th class="hc-sub">방재</th>
+              <th class="hc-sub">영선</th>
+              <th class="hc-sub">보안</th>
+              <th class="hc-sub">퍼블릭</th>
+              <th class="hc-sub">HK</th>
+              <th class="hc-sub">계</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="text" class="hc-inp" data-hc="daily" data-col="0" value=""></td>
+              <td><input type="text" class="hc-inp" data-hc="daily" data-col="1" value=""></td>
+              <td><input type="text" class="hc-inp" data-hc="daily" data-col="2" value=""></td>
+              <td><input type="text" class="hc-inp" data-hc="daily" data-col="3" value=""></td>
+              <td><input type="text" class="hc-inp" data-hc="daily" data-col="4" value=""></td>
+              <td><input type="text" class="hc-inp" data-hc="daily" data-col="5" value=""></td>
+              <td><input type="text" class="hc-inp" data-hc="daily" data-col="6" value=""></td>
+              <td><input type="text" class="hc-inp" data-hc="daily" data-col="7" value=""></td>
+              <td class="hc-sum" id="daily-hc-sum">0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <table class="work-log-tbl" id="daily-log-table">
+        <colgroup>
+          <col style="width:90px;">
+          <col style="width:90px;">
+          <col>
+          <col>
+        </colgroup>
+        <thead>
+          <tr>
+            <th colspan="2">구분</th>
+            <th>금일 실적</th>
+            <th>명일 계획</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="2" class="wl-cat-single">관리</td>
+            <td><textarea class="wl-cell-ta" data-rlog="daily" data-field="mgmt_perf"></textarea></td>
+            <td><textarea class="wl-cell-ta" data-rlog="daily" data-field="mgmt_plan"></textarea></td>
+          </tr>
+          <tr>
+            <td rowspan="4" class="wl-cat-major">시설</td>
+            <td class="wl-cat-sub">기계</td>
+            <td><textarea class="wl-cell-ta" data-rlog="daily" data-field="mech_perf"></textarea></td>
+            <td><textarea class="wl-cell-ta" data-rlog="daily" data-field="mech_plan"></textarea></td>
+          </tr>
+          <tr>
+            <td class="wl-cat-sub">전기</td>
+            <td><textarea class="wl-cell-ta" data-rlog="daily" data-field="elec_perf"></textarea></td>
+            <td><textarea class="wl-cell-ta" data-rlog="daily" data-field="elec_plan"></textarea></td>
+          </tr>
+          <tr>
+            <td class="wl-cat-sub">방재</td>
+            <td><textarea class="wl-cell-ta" data-rlog="daily" data-field="fire_perf"></textarea></td>
+            <td><textarea class="wl-cell-ta" data-rlog="daily" data-field="fire_plan"></textarea></td>
+          </tr>
+          <tr>
+            <td class="wl-cat-sub">영선</td>
+            <td><textarea class="wl-cell-ta" data-rlog="daily" data-field="maint_perf"></textarea></td>
+            <td><textarea class="wl-cell-ta" data-rlog="daily" data-field="maint_plan"></textarea></td>
+          </tr>
+          <tr>
+            <td colspan="2" class="wl-cat-single">보안</td>
+            <td><textarea class="wl-cell-ta" data-rlog="daily" data-field="sec_perf"></textarea></td>
+            <td><textarea class="wl-cell-ta" data-rlog="daily" data-field="sec_plan"></textarea></td>
+          </tr>
+          <tr>
+            <td colspan="2" class="wl-cat-single">퍼블릭</td>
+            <td><textarea class="wl-cell-ta" data-rlog="daily" data-field="pub_perf"></textarea></td>
+            <td><textarea class="wl-cell-ta" data-rlog="daily" data-field="pub_plan"></textarea></td>
+          </tr>
+          <tr>
+            <td colspan="2" class="wl-cat-single">HK</td>
+            <td><textarea class="wl-cell-ta" data-rlog="daily" data-field="hk_perf"></textarea></td>
+            <td><textarea class="wl-cell-ta" data-rlog="daily" data-field="hk_plan"></textarea></td>
+          </tr>
+          <tr>
+            <td colspan="2" class="wl-cat-single">공사 일정</td>
+            <td colspan="2"><textarea class="wl-cell-ta sm-h" data-rlog="daily" data-field="const_sched">-
+-
+-
+-
+-
+-</textarea></td>
+          </tr>
+          <tr>
+            <td colspan="2" class="wl-cat-single">야근 근무현황<br><small style="font-weight:600;color:#475569;">(02-6736-7119<br>/02-6736-7130)</small></td>
+            <td colspan="2"><textarea class="wl-cell-ta sm-h" data-rlog="daily" data-field="night_duty">*시설:
+*보안:</textarea></td>
+          </tr>
+          <tr>
+            <td colspan="2" class="wl-cat-single">이슈 사항</td>
+            <td colspan="2"><textarea class="wl-cell-ta sm-h" data-rlog="daily" data-field="issues"></textarea></td>
+          </tr>
+        </tbody>
+      </table>
+      <div id="daily-status-bar" class="status-bar no-print" style="margin-top:10px;">
+        <span id="daily-status-msg">일일 업무일지 준비 완료</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 주간 업무일지 페이지 ============ -->
+<div id="view-weekly" class="view">
+  <div class="rep-shell">
+    <div class="rep-topbar no-print">
+      <div class="rep-topbar-left">
+        <label style="font-weight:800;">기준일(월~금)</label>
+        <input type="date" id="weekly-date-picker" data-rnav="weekly">
+        <button id="btn-weekly-create" class="pri sm" data-rnav="weekly">주간(월~금) 생성</button>
+        <button id="btn-weekly-save" class="ok sm" data-rnav="weekly">주간 저장</button>
+        <select id="weekly-saved-select" data-rnav="weekly" style="min-width:190px;"></select>
+        <button id="btn-weekly-load" class="pri sm" data-rnav="weekly">불러오기</button>
+        <button id="btn-weekly-del" class="danger sm" data-rnav="weekly">삭제</button>
+      </div>
+      <div class="rep-topbar-right">
+        <button id="btn-weekly-print" class="sm" data-rnav="weekly">🖨 인쇄</button>
+        <button id="btn-weekly-home" class="sm" data-rnav="weekly">◀ 표지</button>
+        <button id="btn-weekly-consult" class="pri sm" data-rnav="weekly">상담 관리</button>
+        <button id="btn-weekly-daily" class="sm" data-rnav="weekly" style="background:#e6f4f1;color:#0f766e;border-color:#86b8ac;">일일 업무일지</button>
+      </div>
+    </div>
+
+    <div class="rep-paper">
+      <div class="rep-meta-head">
+        <div class="rep-title-area">
+          <h2 class="rep-doc-title">주간 업무 보고 _ VL 르웨스트</h2>
+          <div class="rep-weekly-subrow">
+            <span id="weekly-period-text"></span>
+            <span id="weekly-written-text"></span>
+          </div>
+        </div>
+        <table class="headcount-tbl" id="weekly-hc-table">
+          <thead>
+            <tr><th colspan="9" class="hc-group">인원 현황</th></tr>
+            <tr>
+              <th class="hc-sub">관리</th>
+              <th class="hc-sub">기계</th>
+              <th class="hc-sub">전기</th>
+              <th class="hc-sub">방재</th>
+              <th class="hc-sub">영선</th>
+              <th class="hc-sub">보안</th>
+              <th class="hc-sub">퍼블릭</th>
+              <th class="hc-sub">HK</th>
+              <th class="hc-sub">계</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="text" class="hc-inp" data-hc="weekly" data-col="0" value=""></td>
+              <td><input type="text" class="hc-inp" data-hc="weekly" data-col="1" value=""></td>
+              <td><input type="text" class="hc-inp" data-hc="weekly" data-col="2" value=""></td>
+              <td><input type="text" class="hc-inp" data-hc="weekly" data-col="3" value=""></td>
+              <td><input type="text" class="hc-inp" data-hc="weekly" data-col="4" value=""></td>
+              <td><input type="text" class="hc-inp" data-hc="weekly" data-col="5" value=""></td>
+              <td><input type="text" class="hc-inp" data-hc="weekly" data-col="6" value=""></td>
+              <td><input type="text" class="hc-inp" data-hc="weekly" data-col="7" value=""></td>
+              <td class="hc-sum" id="weekly-hc-sum">0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <table class="work-log-tbl" id="weekly-log-table">
+        <colgroup>
+          <col style="width:90px;">
+          <col style="width:90px;">
+          <col>
+          <col>
+        </colgroup>
+        <thead>
+          <tr>
+            <th colspan="2">구분</th>
+            <th>금주 실적</th>
+            <th>차주 계획</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="2" class="wl-cat-single">관리</td>
+            <td><textarea class="wl-cell-ta" data-rlog="weekly" data-field="mgmt_perf"></textarea></td>
+            <td><textarea class="wl-cell-ta" data-rlog="weekly" data-field="mgmt_plan"></textarea></td>
+          </tr>
+          <tr>
+            <td rowspan="4" class="wl-cat-major">시설</td>
+            <td class="wl-cat-sub">기계</td>
+            <td><textarea class="wl-cell-ta" data-rlog="weekly" data-field="mech_perf"></textarea></td>
+            <td><textarea class="wl-cell-ta" data-rlog="weekly" data-field="mech_plan"></textarea></td>
+          </tr>
+          <tr>
+            <td class="wl-cat-sub">전기</td>
+            <td><textarea class="wl-cell-ta" data-rlog="weekly" data-field="elec_perf"></textarea></td>
+            <td><textarea class="wl-cell-ta" data-rlog="weekly" data-field="elec_plan"></textarea></td>
+          </tr>
+          <tr>
+            <td class="wl-cat-sub">방재</td>
+            <td><textarea class="wl-cell-ta" data-rlog="weekly" data-field="fire_perf"></textarea></td>
+            <td><textarea class="wl-cell-ta" data-rlog="weekly" data-field="fire_plan"></textarea></td>
+          </tr>
+          <tr>
+            <td class="wl-cat-sub">영선</td>
+            <td><textarea class="wl-cell-ta" data-rlog="weekly" data-field="maint_perf"></textarea></td>
+            <td><textarea class="wl-cell-ta" data-rlog="weekly" data-field="maint_plan"></textarea></td>
+          </tr>
+          <tr>
+            <td colspan="2" class="wl-cat-single">보안</td>
+            <td><textarea class="wl-cell-ta" data-rlog="weekly" data-field="sec_perf"></textarea></td>
+            <td><textarea class="wl-cell-ta" data-rlog="weekly" data-field="sec_plan"></textarea></td>
+          </tr>
+          <tr>
+            <td colspan="2" class="wl-cat-single">퍼블릭</td>
+            <td><textarea class="wl-cell-ta" data-rlog="weekly" data-field="pub_perf"></textarea></td>
+            <td><textarea class="wl-cell-ta" data-rlog="weekly" data-field="pub_plan"></textarea></td>
+          </tr>
+          <tr>
+            <td colspan="2" class="wl-cat-single">HK</td>
+            <td><textarea class="wl-cell-ta" data-rlog="weekly" data-field="hk_perf"></textarea></td>
+            <td><textarea class="wl-cell-ta" data-rlog="weekly" data-field="hk_plan"></textarea></td>
+          </tr>
+          <tr>
+            <td colspan="2" class="wl-cat-single">공사 일정</td>
+            <td colspan="2"><textarea class="wl-cell-ta sm-h" data-rlog="weekly" data-field="const_sched">-
+-
+-
+-
+-
+-</textarea></td>
+          </tr>
+          <tr>
+            <td colspan="2" class="wl-cat-single">야근 근무현황<br><small style="font-weight:600;color:#475569;">(02-6736-7119<br>/02-6736-7130)</small></td>
+            <td colspan="2"><textarea class="wl-cell-ta sm-h" data-rlog="weekly" data-field="night_duty">*시설:
+*보안:</textarea></td>
+          </tr>
+          <tr>
+            <td colspan="2" class="wl-cat-single">이슈 사항</td>
+            <td colspan="2"><textarea class="wl-cell-ta sm-h" data-rlog="weekly" data-field="issues"></textarea></td>
+          </tr>
+        </tbody>
+      </table>
+      <div id="weekly-status-bar" class="status-bar no-print" style="margin-top:10px;">
+        <span id="weekly-status-msg">주간 업무일지 준비 완료</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const pad = n => String(n).padStart(2, '0');
+const DAYS_KO = ['일', '월', '화', '수', '목', '금', '토'];
+const COL_KEYS = ['dong', 'room', 'dept', 'mgr', 'consult', 'action', 'etc'];
+const CENTER_COLS = new Set(['dong', 'room', 'dept', 'mgr']);
+const LS_CUR = 'vl_cur_mgr_v2';
+const LS_LOCAL = 'vl_local_store_v2';
+const PALETTE = ['#1f5fbf', '#0f766e', '#b45309', '#7c3aed', '#be123c', '#0369a1', '#4d7c0f', '#a21caf'];
+const DEPT_BOX_PALETTE = ['#0f2952', '#064e3b', '#78350f', '#4c1d95', '#881337', '#0c4a6e', '#365314', '#701a75'];
+const DEF_DEPTS = ['하우스키핑', '시설', '보안', '콜센터'];
+const DEF_MGRS = [{ dept: '하우스키핑', rank: '팀장', name: '이중희' }];
+
+function deptColor(name) {
+  let h = 0;
+  for (const ch of String(name || '')) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return name ? PALETTE[h % PALETTE.length] : '#475569';
+}
+function deptBoxColor(name) {
+  let h = 0;
+  for (const ch of String(name || '')) h = (h * 37 + ch.charCodeAt(0)) >>> 0;
+  return name ? DEPT_BOX_PALETTE[h % DEPT_BOX_PALETTE.length] : '#1e293b';
+}
+function esc(str) {
+  return String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function getTodayStr() { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
+function formatNowDateTime() {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${DAYS_KO[d.getDay()]} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function emptyFields() { return { dong: '', room: '', dept: '', mgr: '', consult: '', action: '', etc: '', styles: {} }; }
+function newId(p) { return p + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
+const clone = o => JSON.parse(JSON.stringify(o));
+const isEmptyRow = r => COL_KEYS.every(k => !r[k]);
+
+function loadCur() {
+  try { const v = JSON.parse(localStorage.getItem(LS_CUR)); if (v && typeof v === 'object') return { dept: v.dept || '', rank: v.rank || '', name: v.name || '' }; } catch (e) {}
+  return { dept: '', rank: '', name: '' };
+}
+function saveCur() { try { localStorage.setItem(LS_CUR, JSON.stringify(state.current)); } catch (e) {} }
+
+/* ---------------- 전역 상태 ---------------- */
+let state = { date: getTodayStr(), depts: [], mgrs: [], days: [], current: loadCur(), rows: [] };
+let store = null, mode = 'connecting', readOnly = true;
+let filterQuery = '', selectedCell = { r: 0, c: 0 };
+let undoStack = [];
+let unsubRows = null, rowsTimer = null, renderedSig = '';
+let composing = false, needFull = false;
+let prevMap = new Map(), flashIds = new Set(), lastSync = null, inflight = 0, slow = false;
+const dirty = {};
+const initing = {};
+let seeding = false;
+
+function say(msg, isErr = false) {
+  const el = $('#status-msg'); el.textContent = msg; el.className = isErr ? 'err' : '';
+}
+function coverMsg(msg, isErr = true) {
+  const el = $('#cover-msg'); el.textContent = msg; el.className = 'cv-msg' + (isErr ? ' bad' : '');
+}
+function guardWrite() {
+  if (readOnly) {
+    const m = mode === 'connecting' ? '저장소에 연결 중입니다. 잠시 후 다시 시도해주세요.' : '읽기 전용 권한입니다. 수정하려면 편집 권한이 필요합니다.';
+    say(m, true); coverMsg(m); return false;
+  }
+  return true;
+}
+function track(p) {
+  inflight++; updatePill();
+  return Promise.resolve(p).catch(e => { onWriteError(e); }).finally(() => { inflight--; updatePill(); });
+}
+function onWriteError(e) {
+  const code = e && e.code;
+  if (code === 'invalid_argument') return;
+  if (code === 'quota_exceeded') say('저장 공간 한도를 초과했습니다.', true);
+  else if (code === 'revoked') { readOnly = true; updatePill(); }
+  else say('저장 중 오류가 발생했습니다. 연결 상태를 확인해주세요.', true);
+}
+function onDbError(e) {
+  if (e && e.code === 'revoked') { readOnly = true; }
+  slow = true; updatePill();
+}
+
+/* ---------------- 상태 표시 ---------------- */
+function updatePill() {
+  let cls = 's-connecting', txt = '연결 중…';
+  if (mode === 'live') {
+    if (readOnly) { cls = 's-warn'; txt = '읽기 전용 · 실시간 반영'; }
+    else if (slow) { cls = 's-warn'; txt = '서버 응답 지연 · 최신 내용이 아닐 수 있음'; }
+    else if (inflight > 0) { cls = 's-save'; txt = '저장 중…'; }
+    else { cls = 's-live'; txt = '● 실시간 저장 연결됨' + (lastSync ? ` · ${lastSync}` : ''); }
+  } else if (mode === 'local') { cls = 's-warn'; txt = '로컬 저장 모드'; }
+  const el = $('#pill');
+  if (el) { el.className = 'sync-pill ' + cls; el.textContent = txt; }
+}
+
+/* ---------------- 저장소 어댑터 (공유 DB / 로컬) ---------------- */
+function makeLiveStore(db) {
+  const chains = {};
+  const q = (key, fn) => { const p = (chains[key] || Promise.resolve()).catch(() => {}).then(fn); chains[key] = p; return p; };
+  const rowsCol = d => db.collection('days/' + d + '/rows');
+  const plain = d => ({ id: d.id, ...clone(d.data() || {}) });
+  const api = {
+    mode: 'live',
+    subSeed(cb) { return db.doc('meta/seed').onSnapshot(s => cb(s.exists, s.metadata.fromCache), onDbError); },
+    setSeed() { return q('meta/seed', () => db.doc('meta/seed').set({ done: true })); },
+    subItems(name, cb) { return db.collection(name).onSnapshot(s => cb(s.docs.map(plain)), onDbError); },
+    setItem(name, id, data) { const r = db.collection(name).doc(id); return q(r.path, () => r.set(data)); },
+    delItem(name, id) { const r = db.collection(name).doc(id); return q(r.path, () => r.delete()); },
+    subDays(cb) { return db.collection('days').onSnapshot(s => cb(s.docs.map(plain)), onDbError); },
+    ensureDay(date) {
+      const r = db.doc('days/' + date);
+      return q(r.path, async () => { const s = await r.get(); if (!s.exists) await r.set({ date, created: Date.now() }); });
+    },
+    markSaved(date) {
+      const r = db.doc('days/' + date);
+      return q(r.path, async () => { const s = await r.get(); const base = s.exists ? clone(s.data()) : { date, created: Date.now() }; base.savedAt = formatNowDateTime(); await r.set(base); });
+    },
+    subRows(date, cb) { return rowsCol(date).onSnapshot(s => cb(s.docs.map(plain), s.metadata), onDbError); },
+    setRow(date, id, data) { const r = rowsCol(date).doc(id); return q(r.path, () => r.set(data)); },
+    updateRow(date, id, fields) { const r = rowsCol(date).doc(id); return q(r.path, () => r.update(fields)); },
+    delRow(date, id) { const r = rowsCol(date).doc(id); return q(r.path, () => r.delete()); },
+    async delDay(date) {
+      const s = await rowsCol(date).get();
+      for (const d of s.docs) await api.delRow(date, d.id);
+      const r = db.doc('days/' + date); await q(r.path, () => r.delete());
+    }
+  };
+  return api;
+}
+
+function makeLocalStore() {
+  let data = null;
+  try { data = JSON.parse(localStorage.getItem(LS_LOCAL)); } catch (e) {}
+  data = data || { seeded: false, depts: {}, mgrs: {}, days: {} };
+  const L = { seed: new Set(), depts: new Set(), mgrs: new Set(), days: new Set(), rows: {} };
+  const save = () => { try { localStorage.setItem(LS_LOCAL, JSON.stringify(data)); } catch (e) {} };
+  const day = d => data.days[d] || (data.days[d] = { meta: { date: d, created: Date.now() }, rows: {} });
+  const arr = o => Object.keys(o).map(id => ({ id, ...clone(o[id]) }));
+  const fire = set => set.forEach(f => f());
+  const later = f => { Promise.resolve().then(f); };
+  const api = {
+    mode: 'local',
+    subSeed(cb) { const f = () => cb(data.seeded, false); L.seed.add(f); later(f); return () => L.seed.delete(f); },
+    setSeed() { data.seeded = true; save(); fire(L.seed); },
+    subItems(name, cb) { const set = L[name]; const f = () => cb(arr(data[name])); set.add(f); later(f); return () => set.delete(f); },
+    setItem(name, id, v) { data[name][id] = clone(v); save(); fire(L[name]); },
+    delItem(name, id) { delete data[name][id]; save(); fire(L[name]); },
+    subDays(cb) { const f = () => cb(Object.keys(data.days).map(d => ({ id: d, ...clone(data.days[d].meta) }))); L.days.add(f); later(f); return () => L.days.delete(f); },
+    ensureDay(d) { day(d); save(); fire(L.days); },
+    markSaved(d) { day(d).meta.savedAt = formatNowDateTime(); save(); fire(L.days); },
+    subRows(date, cb) {
+      const f = () => cb(arr(day(date).rows), { fromCache: false, hasPendingWrites: false });
+      (L.rows[date] = L.rows[date] || new Set()).add(f); later(f);
+      return () => L.rows[date].delete(f);
+    },
+    setRow(date, id, v) { day(date).rows[id] = clone(v); save(); fire(L.rows[date] || new Set()); },
+    updateRow(date, id, fields) {
+      const r = day(date).rows[id]; if (!r) return Promise.reject({ code: 'invalid_argument' });
+      const merge = (t, s) => { for (const k in s) { if (s[k] && typeof s[k] === 'object' && !Array.isArray(s[k])) { t[k] = t[k] || {}; merge(t[k], s[k]); } else t[k] = s[k]; } };
+      merge(r, clone(fields)); save(); fire(L.rows[date] || new Set());
+    },
+    delRow(date, id) { delete day(date).rows[id]; save(); fire(L.rows[date] || new Set()); },
+    delDay(date) { delete data.days[date]; save(); fire(L.days); fire(L.rows[date] || new Set()); }
+  };
+  if (!data.seeded) {
+    DEF_DEPTS.forEach((n, i) => { data.depts['d-def-' + i] = { name: n, ord: i }; });
+    DEF_MGRS.forEach((m, i) => { data.mgrs['m-def-' + i] = { ...m, ord: i }; });
+    data.seeded = true; save();
+  }
+  return api;
+}
+
+/* ---------------- 연결 시작 ---------------- */
+async function connect() {
+  updatePill();
+  let db = null, user = null;
+  try {
+    if (typeof claude !== 'undefined' && claude && claude.use) {
+      db = await claude.use('db');
+      try { user = await claude.use('user'); } catch (e) {}
+    }
+  } catch (e) { db = null; }
+  if (db) {
+    store = makeLiveStore(db); mode = 'live'; readOnly = false;
+    try { const can = user && user.can ? await Promise.resolve(user.can('data.write')) : null; if (can === false) readOnly = true; } catch (e) {}
+  } else {
+    store = makeLocalStore(); mode = 'local'; readOnly = false;
+  }
+  updatePill(); startSync();
+}
+
+function startSync() {
+  store.subSeed((exists, fromCache) => {
+    if (!exists && !fromCache && !readOnly && !seeding && mode === 'live') seedDefaults();
+  });
+  store.subItems('depts', list => { state.depts = list.sort((a, b) => (a.ord || 0) - (b.ord || 0) || String(a.name).localeCompare(String(b.name))); renderLists(); });
+  store.subItems('mgrs', list => { state.mgrs = list.sort((a, b) => (a.ord || 0) - (b.ord || 0) || String(a.name).localeCompare(String(b.name))); renderLists(); });
+  store.subDays(list => { state.days = list; refreshSavedDateSelect(); });
+  subscribeRows();
+}
+async function seedDefaults() {
+  seeding = true;
+  try {
+    await store.setSeed();
+    for (let i = 0; i < DEF_DEPTS.length; i++) await store.setItem('depts', 'd-def-' + i, { name: DEF_DEPTS[i], ord: i });
+    for (let i = 0; i < DEF_MGRS.length; i++) await store.setItem('mgrs', 'm-def-' + i, { ...DEF_MGRS[i], ord: i });
+  } catch (e) {}
+}
+
+/* ---------------- 행 구독 / 렌더링 ---------------- */
+function subscribeRows() {
+  if (unsubRows) { unsubRows(); unsubRows = null; }
+  clearTimeout(rowsTimer); slow = false;
+  const date = state.date;
+  state.rows = []; prevMap = new Map(); renderedSig = '';
+  let fresh = false;
+  rowsTimer = setTimeout(() => { if (!fresh) { slow = true; updatePill(); } }, 10000);
+  unsubRows = store.subRows(date, (list, meta) => {
+    if (date !== state.date) return;
+    if (!meta.fromCache) { fresh = true; slow = false; clearTimeout(rowsTimer); lastSync = new Date().toTimeString().slice(0, 8); }
+    onRows(date, list, meta);
+    updatePill();
+  });
+}
+
+function onRows(date, list, meta) {
+  list.sort((a, b) => (a.ord || 0) - (b.ord || 0) || (a.id < b.id ? -1 : 1));
+  list.forEach(r => {
+    const p = dirty[r.id];
+    if (p && p.date === date) Object.assign(r, clone(p.fields));
+    COL_KEYS.forEach(k => { if (r[k] == null) r[k] = ''; });
+    r.styles = r.styles || {};
+  });
+  flashIds = new Set();
+  const next = new Map();
+  list.forEach(r => {
+    const sig = JSON.stringify([COL_KEYS.map(k => r[k]), r.styles]);
+    next.set(r.id, sig);
+    if (!meta.hasPendingWrites && prevMap.has(r.id) && prevMap.get(r.id) !== sig && !dirty[r.id]) flashIds.add(r.id);
+  });
+  prevMap = next;
+  state.rows = list;
+  if (!list.length && !meta.fromCache && !initing[date]) initRows(date);
+  applyRender();
+}
+async function initRows(date) {
+  initing[date] = true;
+  if (readOnly) return;
+  try {
+    await store.ensureDay(date);
+    for (let i = 1; i <= 10; i++) await store.setRow(date, 'i' + pad(i), { ...emptyFields(), ord: i });
+  } catch (e) {}
+}
+
+function cellCss(row, key) {
+  const st = (row.styles && row.styles[key]) || {};
+  let css = '';
+  if (st.bg) css += `background-color:${st.bg};`;
+  if (st.color) css += `color:${st.color};`;
+  if (st.border && st.border !== 'none') css += `border:${st.border};`;
+  return css;
+}
+function autoResizeTextarea(ta) { ta.style.height = 'auto'; ta.style.height = Math.max(31, ta.scrollHeight) + 'px'; }
+
+function getFilteredIndices() {
+  const q = filterQuery.trim().toLowerCase();
+  if (!q) return state.rows.map((_, i) => i);
+  const out = [];
+  state.rows.forEach((row, idx) => {
+    const room = String(row.room || '').toLowerCase();
+    const dr = (String(row.dong || '') + String(row.room || '')).toLowerCase();
+    if (room.includes(q) || dr.includes(q) || String(row.mgr || '').toLowerCase().includes(q) || String(row.dept || '').toLowerCase().includes(q)) out.push(idx);
+  });
+  return out;
+}
+
+function renderTable() {
+  const tbody = $('#list-tbody');
+  const indices = getFilteredIndices();
+  const isFiltered = filterQuery.trim() !== '';
+  const banner = $('#filter-banner');
+  if (isFiltered) {
+    banner.classList.add('active');
+    $('#filter-banner-text').textContent = `찾기 결과 “${filterQuery.trim()}” : 총 ${indices.length}건이 리스트에 표시됩니다.`;
+  } else banner.classList.remove('active');
+
+  renderedSig = state.rows.map(r => r.id).join('|') + '#' + filterQuery;
+  if (!indices.length) {
+    const msg = isFiltered
+      ? `검색 조건 “${esc(filterQuery)}”에 일치하는 리스트가 없습니다. [원래대로] 버튼을 눌러 전체 목록으로 돌아가세요.`
+      : '리스트를 불러오는 중입니다…';
+    tbody.innerHTML = `<tr><td colspan="9" style="padding:24px; color:#64748b; font-weight:700;">${msg}</td></tr>`;
+    $('#row-count-info').textContent = isFiltered ? `검색 결과 0건 / 전체 ${state.rows.length}행` : `총 ${state.rows.length}행`;
+    return;
+  }
+  const ro = readOnly ? ' readonly' : '';
+  tbody.innerHTML = indices.map((realIdx, viewIdx) => {
+    const row = state.rows[realIdx];
+    const cells = COL_KEYS.map((key, cIdx) => {
+      const isSel = selectedCell.r === realIdx && selectedCell.c === cIdx;
+      const align = CENTER_COLS.has(key) ? 'tc' : 'tl';
+      return `<td data-r="${realIdx}" data-c="${cIdx}" data-key="${key}" class="${isSel ? 'selected' : ''}" style="${cellCss(row, key)}">
+        <textarea class="cell-editor ${align}" data-r="${realIdx}" data-c="${cIdx}" data-key="${key}" rows="1"${ro}>${esc(row[key] || '')}</textarea></td>`;
+    }).join('');
+    return `<tr data-real-idx="${realIdx}" class="${flashIds.has(row.id) ? 'flash' : ''}">
+      <td class="seq-cell">${viewIdx + 1}</td>${cells}
+      <td class="col-del"><button class="btn-row-del" data-del-idx="${realIdx}" title="이 행 삭제">삭제</button></td></tr>`;
+  }).join('');
+  $$('#list-tbody textarea.cell-editor').forEach(autoResizeTextarea);
+  $('#row-count-info').textContent = isFiltered ? `검색 결과 ${indices.length}건 / 전체 ${state.rows.length}행` : `총 ${state.rows.length}행`;
+}
+
+function renderKeep() {
+  const ae = document.activeElement;
+  let keep = null;
+  if (ae && ae.classList && ae.classList.contains('cell-editor')) {
+    const row = state.rows[Number(ae.dataset.r)];
+    if (row) keep = { id: row.id, c: Number(ae.dataset.c), s: ae.selectionStart, e: ae.selectionEnd };
+  }
+  renderTable();
+  if (keep) {
+    const r = state.rows.findIndex(x => x.id === keep.id);
+    const t = r >= 0 && document.querySelector(`#list-tbody textarea[data-r="${r}"][data-c="${keep.c}"]`);
+    if (t) { t.focus(); try { t.setSelectionRange(keep.s, keep.e); } catch (e) {} }
+  }
+}
+
+function patchCells() {
+  const tb = $('#list-tbody');
+  state.rows.forEach((row, r) => {
+    COL_KEYS.forEach((key, c) => {
+      const ta = tb.querySelector(`textarea[data-r="${r}"][data-c="${c}"]`);
+      if (!ta) return;
+      const v = row[key] || '';
+      if (ta !== document.activeElement && ta.value !== v) { ta.value = v; autoResizeTextarea(ta); }
+      ta.parentElement.style.cssText = cellCss(row, key);
+    });
+    if (flashIds.has(row.id)) {
+      const tr = tb.querySelector(`tr[data-real-idx="${r}"]`);
+      if (tr) { tr.classList.remove('flash'); void tr.offsetWidth; tr.classList.add('flash'); }
+    }
+  });
+  $('#row-count-info').textContent = filterQuery.trim() ? `검색 결과 ${getFilteredIndices().length}건 / 전체 ${state.rows.length}행` : `총 ${state.rows.length}행`;
+}
+
+function applyRender() {
+  const sig = state.rows.map(r => r.id).join('|') + '#' + filterQuery;
+  const ae = document.activeElement;
+  const inCell = ae && ae.classList && ae.classList.contains('cell-editor');
+  if (sig === renderedSig && !filterQuery.trim()) { patchCells(); return; }
+  if (inCell && composing) { needFull = true; return; }
+  renderKeep();
+}
+
+/* ---------------- 셀 편집 → 실시간 저장 ---------------- */
+function queueEdit(row, fields) {
+  const id = row.id;
+  const p = dirty[id] || (dirty[id] = { date: state.date, fields: {}, timer: null });
+  Object.assign(p.fields, fields);
+  clearTimeout(p.timer);
+  p.timer = setTimeout(() => flushRow(id), 450);
+}
+function flushRow(id) {
+  const p = dirty[id]; if (!p) return Promise.resolve();
+  clearTimeout(p.timer); delete dirty[id];
+  return track(store.updateRow(p.date, id, p.fields));
+}
+function flushAll() { return Promise.all(Object.keys(dirty).map(flushRow)); }
+
+/* ---------------- 실행취소 ---------------- */
+function pushUndo(fn) { undoStack.push(fn); if (undoStack.length > 50) undoStack.shift(); }
+
+/* ---------------- 행 조작 ---------------- */
+function addRow(focusCol) {
+  if (!guardWrite()) return -1;
+  const date = state.date;
+  const id = newId('n');
+  const maxOrd = state.rows.reduce((m, r) => Math.max(m, r.ord || 0), 0);
+  const data = { ...emptyFields(), ord: Math.max(Date.now(), maxOrd + 1) };
+  state.rows.push({ id, ...data });
+  pushUndo(() => track(store.delRow(date, id)));
+  track(store.setRow(date, id, data));
+  selectedCell = { r: state.rows.length - 1, c: focusCol || 0 };
+  renderTable();
+  const t = document.querySelector(`#list-tbody textarea[data-r="${selectedCell.r}"][data-c="${selectedCell.c}"]`);
+  if (t) { t.focus(); t.select(); }
+  return selectedCell.r;
+}
+
+function deleteRow(idx) {
+  if (!guardWrite()) return;
+  const row = state.rows[idx]; if (!row) return;
+  const date = state.date;
+  const snap = clone(row); delete snap.id;
+  if (state.rows.length === 1) {
+    const blank = emptyFields();
+    pushUndo(() => track(store.setRow(date, row.id, snap)));
+    Object.assign(row, blank);
+    track(store.setRow(date, row.id, { ...blank, ord: row.ord || 1 }));
+    renderTable(); say('✓ 선택한 행이 비워졌습니다.'); return;
+  }
+  pushUndo(() => track(store.setRow(date, row.id, snap)));
+  state.rows.splice(idx, 1);
+  if (selectedCell.r >= state.rows.length) selectedCell.r = state.rows.length - 1;
+  delete dirty[row.id];
+  track(store.delRow(date, row.id));
+  renderTable(); say('✓ 선택한 행이 삭제되었습니다.');
+}
+
+function registerEntry() {
+  if (!guardWrite()) return;
+  const dong = $('#entry-dong').value.trim();
+  const room = $('#entry-room').value.trim();
+  const dtText = $('#entry-datetime').value.trim() || formatNowDateTime();
+  const consult = $('#entry-consult').value.trim();
+  const action = $('#entry-action').value.trim();
+  const dept = state.current.dept || '';
+  const mgr = state.current.name || '';
+  if (!room && !consult && !action) { say('세대번호 또는 상담/조치 내용을 입력하세요.', true); $('#entry-room').focus(); return; }
+  if (filterQuery) { filterQuery = ''; $('#search-input').value = ''; }
+
+  const date = state.date;
+  const rec = { dong, room, dept, mgr, consult, action, etc: dtText, styles: {} };
+  const newRowId = newId('n');
+  const emptyIdx = state.rows.findIndex(isEmptyRow);
+  let data, undo;
+  if (emptyIdx !== -1) {
+    const empty = state.rows[emptyIdx];
+    data = { ...rec, ord: empty.ord || 1 };
+    const emptySnap = clone(empty); delete emptySnap.id;
+    state.rows.splice(emptyIdx, 1, { id: newRowId, ...data });
+    delete dirty[empty.id];
+    track(store.setRow(date, newRowId, data));
+    track(store.delRow(date, empty.id));
+    undo = () => { track(store.delRow(date, newRowId)); track(store.setRow(date, empty.id, emptySnap)); };
+    selectedCell = { r: emptyIdx, c: 0 };
+  } else {
+    const maxOrd = state.rows.reduce((m, r) => Math.max(m, r.ord || 0), 0);
+    data = { ...rec, ord: Math.max(Date.now(), maxOrd + 1) };
+    state.rows.push({ id: newRowId, ...data });
+    track(store.setRow(date, newRowId, data));
+    undo = () => track(store.delRow(date, newRowId));
+    selectedCell = { r: state.rows.length - 1, c: 0 };
+  }
+  pushUndo(undo);
+  $('#entry-room').value = ''; $('#entry-consult').value = ''; $('#entry-action').value = '';
+  $('#entry-datetime').value = formatNowDateTime();
+  renderTable();
+  say(`✓ ${dong ? dong + '동 ' : ''}${room ? room + '호 ' : ''}상담/조치 내용이 등록되었습니다.`);
+  $('#entry-room').focus();
+}
+
+function applyStyleToSelected(prop, val) {
+  if (!guardWrite()) return;
+  const row = state.rows[selectedCell.r]; const key = COL_KEYS[selectedCell.c];
+  if (!row || !key) return;
+  const date = state.date;
+  row.styles = row.styles || {}; row.styles[key] = row.styles[key] || {};
+  const prev = row.styles[key][prop] || '';
+  const v = (val === '' || val === 'none') ? '' : val;
+  row.styles[key][prop] = v;
+  pushUndo(() => { track(store.updateRow(date, row.id, { styles: { [key]: { [prop]: prev } } })); });
+  track(store.updateRow(date, row.id, { styles: { [key]: { [prop]: v } } }));
+  renderTable();
+}
+
+/* ---------------- 날짜 / 일자별 저장·불러오기 ---------------- */
+function updateDateUI() {
+  const val = $('#work-date').value;
+  if (!val) { $('#day-label').textContent = '-'; return; }
+  const [y, m, d] = val.split('-').map(Number);
+  const dy = DAYS_KO[new Date(y, m - 1, d).getDay()];
+  $('#day-label').textContent = val === getTodayStr() ? `${dy}요일 · TODAY` : `${dy}요일`;
+}
+async function switchDate(val) {
+  if (!val || !store) return;
+  await flushAll();
+  state.date = val; $('#work-date').value = val; updateDateUI();
+  filterQuery = ''; $('#search-input').value = ''; undoStack = []; selectedCell = { r: 0, c: 0 };
+  renderTable(); subscribeRows(); refreshSavedDateSelect();
+}
+function refreshSavedDateSelect() {
+  const sel = $('#saved-date-select');
+  const days = state.days.slice().sort((a, b) => String(b.id).localeCompare(String(a.id)));
+  if (!days.length) { sel.innerHTML = '<option value="">저장된 일자 없음</option>'; return; }
+  const prev = sel.value;
+  sel.innerHTML = days.map(d => {
+    const [y, m, dd] = String(d.id).split('-').map(Number);
+    const dy = (y && m && dd) ? DAYS_KO[new Date(y, m - 1, dd).getDay()] : '';
+    return `<option value="${esc(d.id)}">${esc(d.id)}${dy ? ' ' + dy : ''}${d.savedAt ? ' ✓' : ''}</option>`;
+  }).join('');
+  if (days.some(d => d.id === prev)) sel.value = prev;
+  else if (days.some(d => d.id === state.date)) sel.value = state.date;
+}
+async function saveByDate() {
+  if (!guardWrite()) return;
+  const dt = $('#work-date').value;
+  if (!dt) return say('저장할 날짜를 선택해주세요.', true);
+  if (dt !== state.date) await switchDate(dt);
+  await flushAll();
+  await track(store.markSaved(state.date));
+  say(`✓ [${state.date}] 일자별 데이터가 저장되었습니다.`);
+}
+let delArm = null;
+function deleteByDate() {
+  if (!guardWrite()) return;
+  const dt = $('#saved-date-select').value;
+  if (!dt) return say('삭제할 저장 일자가 없습니다.', true);
+  const btn = $('#btn-day-del');
+  if (delArm !== dt) {
+    delArm = dt; btn.textContent = '한 번 더';
+    setTimeout(() => { if (delArm === dt) { delArm = null; btn.textContent = '삭제'; } }, 3000);
+    return say(`[${dt}] 삭제하려면 3초 안에 삭제 버튼을 한 번 더 누르세요.`, true);
+  }
+  delArm = null; btn.textContent = '삭제';
+  track(store.delDay(dt)).then(() => {
+    say(`✓ [${dt}] 저장 데이터를 삭제했습니다.`);
+    if (dt === state.date) { initing[dt] = false; subscribeRows(); }
+  });
+}
+
+/* ---------------- 부서 / 관리자 (표지) ---------------- */
+function renderLists() {
+  const dSel = $('#dept-select');
+  dSel.innerHTML = '<option value="">-- 관리부서 선택 --</option>' +
+    state.depts.map(d => `<option value="${esc(d.name)}">${esc(d.name)}</option>`).join('');
+  if (state.current.dept && state.depts.some(d => d.name === state.current.dept)) dSel.value = state.current.dept;
+
+  const mSel = $('#mgr-select');
+  mSel.innerHTML = '<option value="">-- 관리자 선택 --</option>' +
+    state.mgrs.map(m => `<option value="${esc(m.id)}">${esc([m.rank, m.name].filter(Boolean).join(' / ') || m.name || '')}</option>`).join('');
+  const hit = state.mgrs.find(m => m.name === state.current.name && m.dept === state.current.dept);
+  if (hit) mSel.value = hit.id;
+  renderHeader();
+}
+function renderHeader() {
+  const c = state.current;
+  const sub = [c.dept, [c.rank, c.name].filter(Boolean).join(' ')].filter(Boolean).join(' · ');
+  $('#hdr-sub').textContent = sub || '표지에서 관리부서/관리자를 선택하세요';
+  $('.top-header').style.setProperty('--hc', deptColor(c.dept));
+  $('#hdr-cell').style.setProperty('--dc', deptBoxColor(c.dept));
+}
+function addDept() {
+  if (!guardWrite()) return;
+  const val = $('#dept-input').value.trim();
+  if (!val) return coverMsg('등록할 관리부서명을 입력하세요.');
+  if (!state.depts.some(d => d.name === val)) {
+    const id = newId('d'); const item = { name: val, ord: Date.now() };
+    state.depts.push({ id, ...item }); track(store.setItem('depts', id, item));
+  }
+  state.current.dept = val; state.current.rank = ''; state.current.name = ''; saveCur();
+  $('#dept-input').value = '';
+  renderLists(); coverMsg(`✓ 관리부서 [${val}] 등록 및 선택 완료`, false);
+}
+function delDept() {
+  if (!guardWrite()) return;
+  const val = $('#dept-select').value; if (!val) return coverMsg('삭제할 관리부서를 선택하세요.');
+  const d = state.depts.find(x => x.name === val); if (!d) return;
+  state.depts = state.depts.filter(x => x.id !== d.id);
+  if (state.current.dept === val) { state.current = { dept: '', rank: '', name: '' }; saveCur(); }
+  track(store.delItem('depts', d.id)); renderLists(); coverMsg(`✓ 관리부서 [${val}] 삭제 완료`, false);
+}
+function addMgr() {
+  if (!guardWrite()) return;
+  const dept = state.current.dept;
+  const rank = $('#mgr-rank-input').value.trim();
+  const name = $('#mgr-name-input').value.trim();
+  if (!dept) return coverMsg('먼저 관리부서를 선택하세요.');
+  if (!name) return coverMsg('등록할 관리자 이름을 입력하세요.');
+  const id = newId('m'); const item = { dept, rank, name, ord: Date.now() };
+  state.mgrs.push({ id, ...item }); track(store.setItem('mgrs', id, item));
+  state.current = { dept, rank, name }; saveCur();
+  $('#mgr-rank-input').value = ''; $('#mgr-name-input').value = '';
+  renderLists(); coverMsg(`✓ 관리자 [${name}] 등록 및 선택 완료`, false);
+}
+function delMgr() {
+  if (!guardWrite()) return;
+  const id = $('#mgr-select').value; if (!id) return coverMsg('삭제할 관리자를 선택하세요.');
+  const m = state.mgrs.find(x => x.id === id); if (!m) return;
+  state.mgrs = state.mgrs.filter(x => x.id !== id);
+  if (state.current.name === m.name && state.current.dept === m.dept) { state.current.rank = ''; state.current.name = ''; saveCur(); }
+  track(store.delItem('mgrs', id)); renderLists(); coverMsg(`✓ 관리자 [${m.name}] 삭제 완료`, false);
+}
+
+/* ---------------- 화면 전환 ---------------- */
+function route() {
+  const h = location.hash;
+  const isConsult = h === '#consult';
+  const isDaily = h === '#daily';
+  const isWeekly = h === '#weekly';
+  const isCover = !isConsult && !isDaily && !isWeekly;
+
+  $('#view-cover').classList.toggle('on', isCover);
+  $('#view-consult').classList.toggle('on', isConsult);
+  $('#view-daily').classList.toggle('on', isDaily);
+  $('#view-weekly').classList.toggle('on', isWeekly);
+
+  document.documentElement.classList.toggle('cover', isCover);
+  document.documentElement.classList.toggle('report-daily', isDaily);
+  document.documentElement.classList.toggle('report-weekly', isWeekly);
+
+  if (isConsult) {
+    renderHeader();
+    window.scrollTo(0, 0);
+    if (state.rows.length) applyRender();
+  } else if (isDaily) {
+    initReportView('daily');
+    window.scrollTo(0, 0);
+  } else if (isWeekly) {
+    initReportView('weekly');
+    window.scrollTo(0, 0);
+  }
+}
+function goConsult() {
+  if (!state.current.dept || !state.current.name) return coverMsg('관리부서와 관리자를 선택한 뒤 이동해주세요.');
+  coverMsg('', false);
+  location.hash = 'consult'; route();
+}
+function updateCoverDate() {
+  const d = new Date();
+  $('#cv-date').textContent = `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${DAYS_KO[d.getDay()]}요일`;
+}
+
+/* ---------------- 이벤트 바인딩 ---------------- */
+document.addEventListener('DOMContentLoaded', () => {
+  updateCoverDate(); setInterval(updateCoverDate, 60000);
+  $('#work-date').value = state.date; updateDateUI();
+  $('#entry-datetime').value = formatNowDateTime();
+  setInterval(() => { const i = $('#entry-datetime'); if (document.activeElement !== i) i.value = formatNowDateTime(); }, 30000);
+  renderTable(); renderLists(); route();
+  window.addEventListener('hashchange', route);
+  window.addEventListener('resize', () => {
+    if (location.hash === '#daily') autoResizeAllReportTextareas('daily');
+    if (location.hash === '#weekly') autoResizeAllReportTextareas('weekly');
+  });
+  window.addEventListener('beforeunload', () => { flushAll(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) flushAll(); });
+
+  // 표지
+  $('#btn-dept-add').addEventListener('click', addDept);
+  $('#btn-dept-del').addEventListener('click', delDept);
+  $('#btn-mgr-add').addEventListener('click', addMgr);
+  $('#btn-mgr-del').addEventListener('click', delMgr);
+  $('#dept-select').addEventListener('change', e => {
+    state.current = { dept: e.target.value, rank: '', name: '' }; saveCur(); renderLists();
+  });
+  $('#mgr-select').addEventListener('change', e => {
+    const m = state.mgrs.find(x => x.id === e.target.value);
+    if (!m) { state.current.rank = ''; state.current.name = ''; }
+    else state.current = { dept: m.dept || '', rank: m.rank || '', name: m.name || '' };
+    saveCur(); renderLists();
+  });
+  $('#dept-input').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); addDept(); } });
+  ['mgr-rank-input', 'mgr-name-input'].forEach(id => $('#' + id).addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); addMgr(); } }));
+  $('#btn-go').addEventListener('click', goConsult);
+  $('#btn-cover').addEventListener('click', () => { flushAll(); location.hash = ''; route(); });
+
+  // 상단 날짜 / 일자별
+  $('#work-date').addEventListener('change', e => { updateDateUI(); switchDate(e.target.value); });
+  $('#btn-day-save').addEventListener('click', saveByDate);
+  $('#btn-day-load').addEventListener('click', () => { const v = $('#saved-date-select').value; if (!v) return say('불러올 저장 일자가 없습니다.', true); switchDate(v).then(() => say(`✓ [${v}] 일자별 데이터를 불러왔습니다.`)); });
+  $('#btn-day-del').addEventListener('click', deleteByDate);
+  $('#btn-print').addEventListener('click', () => {
+    const c = state.current;
+    $('#print-meta').textContent = `기준일자: ${state.date} | 담당: ${[c.dept, c.rank, c.name].filter(Boolean).join(' ') || '-'}`;
+    window.print();
+  });
+
+  // 등록 / 행 추가
+  $('#btn-entry-register').addEventListener('click', registerEntry);
+  $('#btn-add-row').addEventListener('click', () => { if (addRow(0) >= 0) say(`✓ 새 행이 추가되었습니다. 총 ${state.rows.length}행`); });
+
+  // 찾기
+  function runSearch() {
+    filterQuery = $('#search-input').value; renderTable();
+    const cnt = getFilteredIndices().length;
+    say(filterQuery.trim() ? `✓ “${filterQuery.trim()}” 검색 결과 ${cnt}건이 표에 표시됩니다.` : '전체 리스트가 표시됩니다.');
+  }
+  function resetSearch() { filterQuery = ''; $('#search-input').value = ''; renderTable(); say('✓ 원래대로 전체 리스트 상태로 환원되었습니다.'); }
+  $('#btn-find').addEventListener('click', runSearch);
+  $('#search-input').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); runSearch(); } });
+  $('#btn-reset-view').addEventListener('click', resetSearch);
+  $('#btn-banner-reset').addEventListener('click', resetSearch);
+
+  // 서식
+  $('#btn-fill-apply').addEventListener('click', () => applyStyleToSelected('bg', $('#fill-color').value));
+  $('#btn-fill-clear').addEventListener('click', () => applyStyleToSelected('bg', ''));
+  $('#btn-font-apply').addEventListener('click', () => applyStyleToSelected('color', $('#font-color').value));
+  $('#btn-border-apply').addEventListener('click', () => applyStyleToSelected('border', $('#border-style').value));
+
+  // 실행취소
+  $('#btn-undo').addEventListener('click', () => {
+    if (!guardWrite()) return;
+    const fn = undoStack.pop();
+    if (!fn) return say('되돌릴 작업 내역이 없습니다.', true);
+    fn(); say('✓ 실행취소가 완료되었습니다.');
+  });
+
+  // 리스트 셀 이벤트
+  const tbody = $('#list-tbody');
+  tbody.addEventListener('focusin', e => {
+    const ta = e.target.closest('textarea.cell-editor'); if (!ta) return;
+    selectedCell = { r: Number(ta.dataset.r), c: Number(ta.dataset.c) };
+    $$('#list-tbody td.selected').forEach(td => td.classList.remove('selected'));
+    ta.parentElement.classList.add('selected');
+  });
+  tbody.addEventListener('compositionstart', () => { composing = true; });
+  tbody.addEventListener('compositionend', () => { composing = false; if (needFull) { needFull = false; renderKeep(); } });
+  tbody.addEventListener('input', e => {
+    const ta = e.target.closest('textarea.cell-editor'); if (!ta) return;
+    if (readOnly) return;
+    const row = state.rows[Number(ta.dataset.r)]; if (!row) return;
+    const key = ta.dataset.key;
+    row[key] = ta.value; autoResizeTextarea(ta);
+    queueEdit(row, { [key]: ta.value });
+  });
+  tbody.addEventListener('focusout', e => {
+    const ta = e.target.closest('textarea.cell-editor'); if (!ta) return;
+    const row = state.rows[Number(ta.dataset.r)]; if (row && dirty[row.id]) flushRow(row.id);
+  });
+  tbody.addEventListener('click', e => {
+    const b = e.target.closest('button[data-del-idx]'); if (b) deleteRow(Number(b.dataset.delIdx));
+  });
+
+  /* Enter / 화살표 이동 (상담 관리 페이지) */
+  document.addEventListener('keydown', e => {
+    const el = e.target;
+    if (!el || !['INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName)) return;
+    if (!el.closest('#view-consult')) return;
+    if (el.id === 'search-input') return;
+    const isSheetCell = el.classList.contains('cell-editor');
+    const isTextarea = el.tagName === 'TEXTAREA';
+    const key = e.key;
+
+    if (key === 'Enter' && (e.altKey || e.ctrlKey || e.metaKey) && isTextarea) {
+      e.preventDefault();
+      const s = el.selectionStart, en = el.selectionEnd;
+      el.value = el.value.substring(0, s) + '\n' + el.value.substring(en);
+      el.selectionStart = el.selectionEnd = s + 1;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      return;
+    }
+    if (e.isComposing) return;
+
+    if (isSheetCell) {
+      const r = Number(el.dataset.r), c = Number(el.dataset.c);
+      const visible = [...tbody.querySelectorAll('tr[data-real-idx]')];
+      const vIdx = visible.findIndex(tr => Number(tr.dataset.realIdx) === r);
+      let dRow = 0, dCol = 0;
+      if (key === 'Enter') dRow = e.shiftKey ? -1 : 1;
+      else if (key === 'ArrowDown') { if (el.selectionEnd === el.value.length) dRow = 1; }
+      else if (key === 'ArrowUp') { if (el.selectionStart === 0) dRow = -1; }
+      else if (key === 'ArrowLeft') { if (el.selectionStart === 0 && el.selectionEnd === 0) dCol = -1; }
+      else if (key === 'ArrowRight') { if (el.selectionStart === el.value.length && el.selectionEnd === el.value.length) dCol = 1; }
+      if (!dRow && !dCol) return;
+      e.preventDefault();
+      const nv = vIdx + dRow, nc = c + dCol;
+      if (dRow === 1 && nv >= visible.length && !filterQuery.trim()) { addRow(nc); return; }
+      if (nv >= 0 && nv < visible.length && nc >= 0 && nc < COL_KEYS.length) {
+        const t = tbody.querySelector(`textarea[data-r="${Number(visible[nv].dataset.realIdx)}"][data-c="${nc}"]`);
+        if (t) { t.focus(); t.select(); }
+      }
+      return;
+    }
+
+    const nav = $$('#view-consult input[data-nav], #view-consult select[data-nav], #view-consult textarea[data-nav]');
+    const idx = nav.indexOf(el);
+    if (idx === -1) return;
+    const go = t => { if (t) { t.focus(); if (t.select) t.select(); } };
+    if (key === 'Enter') {
+      if (el.tagName === 'BUTTON') return;
+      e.preventDefault();
+      const next = nav[idx + (e.shiftKey ? -1 : 1)];
+      go(next || tbody.querySelector('textarea.cell-editor'));
+    } else if (key === 'ArrowDown') {
+      if (!isTextarea || el.selectionEnd === el.value.length) { e.preventDefault(); go(nav[idx + 1] || tbody.querySelector('textarea.cell-editor')); }
+    } else if (key === 'ArrowUp') {
+      if (!isTextarea || el.selectionStart === 0) { e.preventDefault(); go(nav[idx - 1]); }
+    } else if (key === 'ArrowRight' && el.tagName !== 'SELECT') {
+      if (el.selectionStart === el.value.length && el.selectionEnd === el.value.length) { e.preventDefault(); go(nav[idx + 1]); }
+    } else if (key === 'ArrowLeft' && el.tagName !== 'SELECT') {
+      if (el.selectionStart === 0 && el.selectionEnd === 0) { e.preventDefault(); go(nav[idx - 1]); }
+    }
+  });
+
+
+/* ---------------- 일일 / 주간 업무일지 ---------------- */
+const LOG_FIELDS = [
+  'mgmt_perf', 'mgmt_plan',
+  'mech_perf', 'mech_plan',
+  'elec_perf', 'elec_plan',
+  'fire_perf', 'fire_plan',
+  'maint_perf', 'maint_plan',
+  'sec_perf', 'sec_plan',
+  'pub_perf', 'pub_plan',
+  'hk_perf', 'hk_plan',
+  'const_sched', 'night_duty', 'issues'
+];
+
+function getReportStorageKey(type, keyStr) {
+  return `vl_worklog_${type}:${keyStr}`;
+}
+
+function formatKoreanDate(ymd) {
+  const p = String(ymd || '').split('-').map(Number);
+  if (p.length !== 3 || !p[0]) return ymd || '';
+  return `${p[0]}년 ${p[1]}월 ${p[2]}일`;
+}
+
+function getMonToFriRange(ymd) {
+  const p = String(ymd || getTodayStr()).split('-').map(Number);
+  const base = new Date(p[0], p[1] - 1, p[2]);
+  const dow = base.getDay(); // 0:Sun, 1:Mon ... 6:Sat
+  const diffToMon = dow === 0 ? -6 : (1 - dow);
+  const mon = new Date(base.getFullYear(), base.getMonth(), base.getDate() + diffToMon);
+  const tue = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 1);
+  const fri = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 4);
+  const monStr = `${mon.getFullYear()}-${pad(mon.getMonth() + 1)}-${pad(mon.getDate())}`;
+  const friStr = `${fri.getFullYear()}-${pad(fri.getMonth() + 1)}-${pad(fri.getDate())}`;
+  const periodLabel = `기간 : ${mon.getFullYear()}년 ${mon.getMonth() + 1}월 ${mon.getDate()}일 월요일~${fri.getFullYear()}년 ${fri.getMonth() + 1}월 ${fri.getDate()}일 금요일`;
+  const writtenLabel = `작성일 : ${tue.getFullYear()}년 ${tue.getMonth() + 1}월 ${tue.getDate()}일 화요일`;
+  return { keyStr: monStr, monStr, friStr, periodLabel, writtenLabel, label: periodLabel };
+}
+
+function emptyReportData(type, keyStr) {
+  const hc = Array(8).fill('');
+  const fields = {};
+  LOG_FIELDS.forEach(f => {
+    if (f === 'const_sched') fields[f] = '-\n-\n-\n-\n-\n-';
+    else if (f === 'night_duty') fields[f] = '*시설:\n*보안:';
+    else fields[f] = '';
+  });
+  if (type === 'daily') {
+    return { type, keyStr, displayDate: formatKoreanDate(keyStr), hc, fields };
+  }
+  const rng = getMonToFriRange(keyStr);
+  return {
+    type,
+    keyStr: rng.keyStr,
+    displayDate: rng.periodLabel,
+    periodLabel: rng.periodLabel,
+    writtenLabel: rng.writtenLabel,
+    hc,
+    fields
+  };
+}
+
+function recalcHeadcountSum(type) {
+  const inputs = $$(`.hc-inp[data-hc="${type}"]`);
+  let total = 0;
+  inputs.forEach(inp => {
+    const v = parseFloat(String(inp.value || '').replace(/,/g, '').trim());
+    if (!isNaN(v)) total += v;
+  });
+  const sumEl = $(`#${type}-hc-sum`);
+  if (sumEl) sumEl.textContent = Number.isInteger(total) ? String(total) : String(+total.toFixed(1));
+}
+
+function autoResizeReportTextarea(ta) {
+  if (!ta) return;
+  const minH = ta.classList.contains('sm-h') ? 58 : 76;
+  ta.style.height = 'auto';
+  ta.style.height = Math.max(minH, ta.scrollHeight) + 'px';
+}
+
+function autoResizeAllReportTextareas(type) {
+  $$(`textarea[data-rlog="${type}"]`).forEach(autoResizeReportTextarea);
+}
+
+function applyReportDataToDom(type, data) {
+  const pickerVal = $(`#${type}-date-picker`).value || getTodayStr();
+  const d = data || emptyReportData(type, pickerVal);
+  if (type === 'daily') {
+    $(`#daily-display-date`).textContent = d.displayDate || formatKoreanDate(pickerVal);
+  } else {
+    const rng = getMonToFriRange(d.keyStr || pickerVal);
+    $(`#weekly-period-text`).textContent = d.periodLabel || rng.periodLabel;
+    $(`#weekly-written-text`).textContent = d.writtenLabel || rng.writtenLabel;
+  }
+  const hcInputs = $$(`.hc-inp[data-hc="${type}"]`);
+  hcInputs.forEach((inp, idx) => {
+    inp.value = (d.hc && d.hc[idx] != null) ? d.hc[idx] : '';
+  });
+  recalcHeadcountSum(type);
+
+  LOG_FIELDS.forEach(f => {
+    const ta = $(`textarea[data-rlog="${type}"][data-field="${f}"]`);
+    if (ta) {
+      ta.value = (d.fields && d.fields[f] != null) ? d.fields[f] : '';
+    }
+  });
+  requestAnimationFrame(() => autoResizeAllReportTextareas(type));
+}
+
+function collectReportDataFromDom(type) {
+  const pickerVal = $(`#${type}-date-picker`).value || getTodayStr();
+  const keyStr = type === 'daily' ? pickerVal : getMonToFriRange(pickerVal).keyStr;
+  const hc = $$(`.hc-inp[data-hc="${type}"]`).map(inp => inp.value.trim());
+  const fields = {};
+  LOG_FIELDS.forEach(f => {
+    const ta = $(`textarea[data-rlog="${type}"][data-field="${f}"]`);
+    fields[f] = ta ? ta.value : '';
+  });
+  if (type === 'daily') {
+    return {
+      type,
+      keyStr,
+      displayDate: $(`#daily-display-date`).textContent.trim(),
+      hc,
+      fields,
+      savedAt: formatNowDateTime()
+    };
+  }
+  const rng = getMonToFriRange(pickerVal);
+  return {
+    type,
+    keyStr,
+    displayDate: rng.periodLabel,
+    periodLabel: $(`#weekly-period-text`).textContent.trim() || rng.periodLabel,
+    writtenLabel: $(`#weekly-written-text`).textContent.trim() || rng.writtenLabel,
+    hc,
+    fields,
+    savedAt: formatNowDateTime()
+  };
+}
+
+function getSavedReportKeys(type) {
+  const prefix = `vl_worklog_${type}:`;
+  const list = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(prefix)) list.push(k.slice(prefix.length));
+    }
+  } catch (e) {}
+  return list.sort().reverse();
+}
+
+function refreshReportSavedSelect(type, selectKey) {
+  const sel = $(`#${type}-saved-select`);
+  if (!sel) return;
+  const keys = getSavedReportKeys(type);
+  if (!keys.length) {
+    sel.innerHTML = '<option value="">저장된 내역 없음</option>';
+    return;
+  }
+  sel.innerHTML = keys.map(ks => {
+    let label = ks;
+    if (type === 'weekly') {
+      const r = getMonToFriRange(ks);
+      label = `${r.monStr} ~ ${r.friStr} (월~금)`;
+    }
+    return `<option value="${esc(ks)}">${esc(label)}</option>`;
+  }).join('');
+  if (selectKey && keys.includes(selectKey)) sel.value = selectKey;
+}
+
+function setReportStatus(type, msg, isErr = false) {
+  const el = $(`#${type}-status-msg`);
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = isErr ? 'var(--bad)' : 'var(--bl)';
+}
+
+function initReportView(type) {
+  const picker = $(`#${type}-date-picker`);
+  if (!picker.value) picker.value = getTodayStr();
+  const curKey = type === 'daily' ? picker.value : getMonToFriRange(picker.value).keyStr;
+  refreshReportSavedSelect(type, curKey);
+  try {
+    const raw = localStorage.getItem(getReportStorageKey(type, curKey));
+    if (raw) {
+      applyReportDataToDom(type, JSON.parse(raw));
+      setReportStatus(type, `✓ [${curKey}] 저장된 ${type === 'daily' ? '일일' : '주간'} 업무일지를 불러왔습니다.`);
+      return;
+    }
+  } catch (e) {}
+  applyReportDataToDom(type, emptyReportData(type, picker.value));
+  setReportStatus(type, `기준일 [${curKey}] 새 양식 준비 완료 (기본 작성일 적용)`);
+}
+
+function createReportSheet(type) {
+  const pickerVal = $(`#${type}-date-picker`).value || getTodayStr();
+  const keyStr = type === 'daily' ? pickerVal : getMonToFriRange(pickerVal).keyStr;
+  const fresh = emptyReportData(type, pickerVal);
+  applyReportDataToDom(type, fresh);
+  try {
+    localStorage.setItem(getReportStorageKey(type, keyStr), JSON.stringify(fresh));
+  } catch (e) {}
+  refreshReportSavedSelect(type, keyStr);
+  setReportStatus(type, type === 'daily'
+    ? `✓ [${keyStr}] 일일 업무일지가 생성되었습니다.`
+    : `✓ [${fresh.displayDate}] 주간(월~금) 업무일지가 생성되었습니다.`);
+}
+
+function saveReportSheet(type) {
+  const payload = collectReportDataFromDom(type);
+  const keyStr = payload.keyStr;
+  try {
+    localStorage.setItem(getReportStorageKey(type, keyStr), JSON.stringify(payload));
+    refreshReportSavedSelect(type, keyStr);
+    setReportStatus(type, `✓ [${keyStr}] ${type === 'daily' ? '일일' : '주간'} 업무일지가 저장되었습니다. (${payload.savedAt})`);
+  } catch (e) {
+    setReportStatus(type, '저장에 실패했습니다.', true);
+  }
+}
+
+function loadReportSheet(type) {
+  const selVal = $(`#${type}-saved-select`).value;
+  if (!selVal) return setReportStatus(type, '불러올 저장 내역이 없습니다.', true);
+  try {
+    const raw = localStorage.getItem(getReportStorageKey(type, selVal));
+    if (!raw) return setReportStatus(type, `[${selVal}] 저장된 데이터가 없습니다.`, true);
+    const parsed = JSON.parse(raw);
+    $(`#${type}-date-picker`).value = selVal;
+    applyReportDataToDom(type, parsed);
+    setReportStatus(type, `✓ [${selVal}] ${type === 'daily' ? '일일' : '주간'} 업무일지를 불러왔습니다.`);
+  } catch (e) {
+    setReportStatus(type, '불러오기 중 오류가 발생했습니다.', true);
+  }
+}
+
+function deleteReportSheet(type) {
+  const selVal = $(`#${type}-saved-select`).value;
+  if (!selVal) return setReportStatus(type, '삭제할 저장 내역이 없습니다.', true);
+  try {
+    localStorage.removeItem(getReportStorageKey(type, selVal));
+    refreshReportSavedSelect(type);
+    applyReportDataToDom(type, emptyReportData(type, $(`#${type}-date-picker`).value || getTodayStr()));
+    setReportStatus(type, `✓ [${selVal}] 저장 내역을 삭제했습니다.`);
+  } catch (e) {}
+}
+
+
+function isReportDefaultEmpty(type) {
+  const tas = $$(`textarea[data-rlog="${type}"]`);
+  return tas.every(ta => {
+    const f = ta.dataset.field;
+    const val = ta.value.replace(/\r/g, '').trim();
+    if (!val) return true;
+    if (f === 'const_sched' && val === '-\n-\n-\n-\n-\n-') return true;
+    if (f === 'night_duty' && val === '*시설:\n*보안:') return true;
+    return false;
+  });
+}
+
+function prepareReportPrint(type) {
+  const isDefault = isReportDefaultEmpty(type);
+  document.documentElement.classList.toggle('print-one-page', isDefault);
+  $$(`textarea[data-rlog="${type}"]`).forEach(ta => {
+    if (isDefault) {
+      ta.style.height = ta.classList.contains('sm-h') ? '48px' : '56px';
+    } else {
+      autoResizeReportTextarea(ta);
+    }
+  });
+}
+
+function restoreAfterReportPrint(type) {
+  document.documentElement.classList.remove('print-one-page');
+  autoResizeAllReportTextareas(type);
+}
+
+function printReportPage(type) {
+  prepareReportPrint(type);
+  const cleanup = () => {
+    restoreAfterReportPrint(type);
+    window.removeEventListener('afterprint', cleanup);
+  };
+  window.addEventListener('afterprint', cleanup);
+  setTimeout(() => window.print(), 40);
+}
+
+window.addEventListener('beforeprint', () => {
+  if (location.hash === '#daily') prepareReportPrint('daily');
+  else if (location.hash === '#weekly') prepareReportPrint('weekly');
+});
+
+function setupReportEvents() {
+  // 표지 및 페이지 간 상호 이동 버튼
+  $('#btn-go-daily').addEventListener('click', () => {
+    coverMsg('', false);
+    location.hash = 'daily';
+    route();
+  });
+  $('#btn-go-weekly').addEventListener('click', () => {
+    coverMsg('', false);
+    location.hash = 'weekly';
+    route();
+  });
+  $('#btn-consult-daily').addEventListener('click', () => {
+    flushAll();
+    location.hash = 'daily';
+    route();
+  });
+  $('#btn-consult-weekly').addEventListener('click', () => {
+    flushAll();
+    location.hash = 'weekly';
+    route();
+  });
+  $('#btn-daily-weekly').addEventListener('click', () => {
+    location.hash = 'weekly';
+    route();
+  });
+  $('#btn-weekly-daily').addEventListener('click', () => {
+    location.hash = 'daily';
+    route();
+  });
+
+  // 일일 / 주간 버튼 바인딩
+  ['daily', 'weekly'].forEach(type => {
+    $(`#btn-${type}-create`).addEventListener('click', () => createReportSheet(type));
+    $(`#btn-${type}-save`).addEventListener('click', () => saveReportSheet(type));
+    $(`#btn-${type}-load`).addEventListener('click', () => loadReportSheet(type));
+    $(`#btn-${type}-del`).addEventListener('click', () => deleteReportSheet(type));
+    $(`#${type}-saved-select`).addEventListener('change', () => {
+      if ($(`#${type}-saved-select`).value) loadReportSheet(type);
+    });
+    $(`#${type}-date-picker`).addEventListener('change', () => {
+      const pVal = $(`#${type}-date-picker`).value || getTodayStr();
+      const kStr = type === 'daily' ? pVal : getMonToFriRange(pVal).keyStr;
+      try {
+        const raw = localStorage.getItem(getReportStorageKey(type, kStr));
+        if (raw) {
+          applyReportDataToDom(type, JSON.parse(raw));
+          refreshReportSavedSelect(type, kStr);
+          setReportStatus(type, `✓ [${kStr}] 저장된 업무일지를 불러왔습니다.`);
+          return;
+        }
+      } catch (e) {}
+      applyReportDataToDom(type, emptyReportData(type, pVal));
+      refreshReportSavedSelect(type);
+      setReportStatus(type, `기준일 [${kStr}] 기본 작성일로 설정되었습니다.`);
+    });
+    $(`#btn-${type}-print`).addEventListener('click', () => printReportPage(type));
+    $(`#btn-${type}-home`).addEventListener('click', () => { location.hash = ''; route(); });
+    $(`#btn-${type}-consult`).addEventListener('click', () => {
+      if (!state.current.dept || !state.current.name) {
+        location.hash = '';
+        route();
+        coverMsg('상담 관리 페이지로 이동하려면 관리부서와 관리자를 선택해주세요.');
+        return;
+      }
+      location.hash = 'consult';
+      route();
+    });
+
+    // 인원현황 입력 시 합계 실시간 계산
+    $$(`.hc-inp[data-hc="${type}"]`).forEach(inp => {
+      inp.addEventListener('input', () => recalcHeadcountSum(type));
+    });
+
+    // 부서별 내용 입력란 텍스트 양에 따라 스크롤바 없이 박스 높이 자동 확장
+    $$(`textarea[data-rlog="${type}"]`).forEach(ta => {
+      ta.addEventListener('input', () => autoResizeReportTextarea(ta));
+    });
+
+    // 일일/주간 업무일지 내 모든 셀 화살표 및 엔터 이동/입력 지원
+    const viewEl = $(`#view-${type}`);
+    viewEl.addEventListener('keydown', e => {
+      const el = e.target;
+      if (!el || !['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName)) return;
+      if (e.isComposing) return;
+
+      const isTa = el.tagName === 'TEXTAREA';
+      if (e.key === 'Enter' && (e.altKey || e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        if (isTa) {
+          const s = el.selectionStart, en = el.selectionEnd;
+          el.value = el.value.substring(0, s) + '\n' + el.value.substring(en);
+          el.selectionStart = el.selectionEnd = s + 1;
+          autoResizeReportTextarea(el);
+        } else {
+          // 인원현황 등 단일 입력 셀에서도 ALT+ENTER / CTRL+ENTER 시 다음 입력칸 또는 줄바꿈 동작
+          const nextTa = el.closest('.rep-paper')?.querySelector('textarea.wl-cell-ta');
+          if (nextTa) { nextTa.focus(); }
+        }
+        return;
+      }
+
+      const cells = $$(`#view-${type} .rep-paper input, #view-${type} .rep-paper textarea`);
+      const idx = cells.indexOf(el);
+      if (idx === -1) return;
+
+      const moveTo = nextIdx => {
+        if (nextIdx >= 0 && nextIdx < cells.length) {
+          const target = cells[nextIdx];
+          target.focus();
+          if (target.select) target.select();
+        }
+      };
+
+      if (e.key === 'Enter') {
+        if (isTa && !e.shiftKey) {
+          // 금일실적 -> 명일계획 등 다음 입력 셀로 이동 (Shift+Enter 또는 Alt+Enter로 줄바꿈 가능)
+          e.preventDefault();
+          moveTo(idx + 1);
+        } else if (!isTa) {
+          e.preventDefault();
+          moveTo(idx + (e.shiftKey ? -1 : 1));
+        }
+      } else if (e.key === 'ArrowDown') {
+        if (!isTa || el.selectionEnd === el.value.length) {
+          e.preventDefault();
+          moveTo(idx + 1);
+        }
+      } else if (e.key === 'ArrowUp') {
+        if (!isTa || el.selectionStart === 0) {
+          e.preventDefault();
+          moveTo(idx - 1);
+        }
+      } else if (e.key === 'ArrowRight') {
+        if (el.selectionStart === el.value.length && el.selectionEnd === el.value.length) {
+          e.preventDefault();
+          moveTo(idx + 1);
+        }
+      } else if (e.key === 'ArrowLeft') {
+        if (el.selectionStart === 0 && el.selectionEnd === 0) {
+          e.preventDefault();
+          moveTo(idx - 1);
+        }
+      }
+    });
+  });
+}
+
+  setupReportEvents();
+  connect();
+});
+</script>
+</body>
+</html>
